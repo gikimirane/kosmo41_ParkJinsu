@@ -9,7 +9,7 @@ public class Quiz11 {
 				{13,14,15,16}
 		};
 		int[][] arr2 = new int[4][4];
-		int a = 0;
+
 		for(int i = 0; i < arr.length; i++)
 		{
 			for(int k = 0; k < 4; k++)
@@ -30,7 +30,7 @@ public class Quiz11 {
 				System.out.println();				
 			}
 			System.out.println();
-			if(a == 0)
+			if(true)
 			{
 				for(int l = 0; l < arr.length; l++)
 				{
