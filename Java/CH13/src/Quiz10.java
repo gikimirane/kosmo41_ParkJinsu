@@ -6,7 +6,6 @@ public class Quiz10 {
 		int num = 0;
 		for(int j = 0; j < arr.length-1; j++)
 		{
-			
 			for(int i = 0; i < arr.length-1; i++)
 			{
 				if(arr[i] > arr[i+1])
@@ -15,7 +14,6 @@ public class Quiz10 {
 					arr[i+1] = arr[i];
 					arr[i] = num;
 				}
-			
 			}
 		}
 		for(int e : arr)
