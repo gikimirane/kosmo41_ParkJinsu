@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -14,10 +15,10 @@ class StrComp implements Comparator<String>
 public class E6_StringComparator {
 
 	public static void main(String[] args) {
-		List<String> list = new ArrayList<>();
-		list.add("ROBOT");
-		list.add("APPLE");
-		list.add("BOX");
+		List<String> list = Arrays.asList("ROBOT","APPLE","BOX");
+		//list.add("ROBOT");
+		//list.add("APPLE");
+		//list.add("BOX");
 		
 		StrComp cmp = new StrComp();//정렬과 탐색의 기준
 		Collections.sort(list, cmp);//정렬

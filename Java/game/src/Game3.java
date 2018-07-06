@@ -13,6 +13,14 @@ public class Game3 {
 			||(str1[0][9].equals(str1[2][9])&&(str1[0][9].equals(str1[4][9])))
 			||(str1[0][5].equals(str1[2][5])&&(str1[0][5]).equals(str1[4][5])))
 		{
+			for(int j = 0; j < str1.length; j++)
+			{
+				for(int k = 0; k < str1[j].length; k++)
+				{
+					System.out.print(str1[j][k]);
+				}
+				System.out.println();
+			}
 			return true;
 		}
 		return false;
@@ -95,29 +103,21 @@ public class Game3 {
 			Game3.puzzle1(str1);
 			if(Game3.compare(str1))
 			{	
-				for(int j = 0; j < str1.length; j++)
-				{
-					for(int k = 0; k < str1[j].length; k++)
-					{
-						System.out.print(str1[j][k]);
-					}
-					System.out.println();
-				}
 				System.out.println("Player 1, win"); return;
 			}	
 			Game3.puzzle2(str1);
 			if(Game3.compare(str1))
 			{
-				for(int j = 0; j < str1.length; j++)
-				{
-					for(int k = 0; k < str1[j].length; k++)
-					{
-						System.out.print(str1[j][k]);
-					}
-					System.out.println();
-				}
 				System.out.println("Player 2, win"); return;
 			}
+		}
+		for(int j = 0; j < str1.length; j++)
+		{
+			for(int k = 0; k < str1[j].length; k++)
+			{
+				System.out.print(str1[j][k]);
+			}
+			System.out.println();
 		}
 		System.out.println("비겼습니다.");		
 	}
