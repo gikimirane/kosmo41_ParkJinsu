@@ -1,3 +1,4 @@
+
 interface PrintableC
 {
 	void print(String s);
