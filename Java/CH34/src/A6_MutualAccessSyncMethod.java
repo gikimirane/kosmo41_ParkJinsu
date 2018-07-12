@@ -1,4 +1,4 @@
-class Counter1
+class Counter7
 {
 	int count = 0; // 공유되는 변수
 	
@@ -18,7 +18,7 @@ class Counter1
 	}
 }
 public class A6_MutualAccessSyncMethod {
-	public static Counter1 cnt = new Counter1();
+	public static Counter7 cnt = new Counter7();
 	
 	public static void main(String[] args) throws InterruptedException {
 		Runnable task1 = () -> {
