@@ -5,7 +5,6 @@ public class MultiServer6 {
 	ServerSocket serverSocket = null;
 	Socket socket = null;
 	Map<String, PrintWriter> clientMap;
-	List<String> lst = new ArrayList<String>();
 	
 	//생성자
 	public MultiServer6()
@@ -106,14 +105,13 @@ public class MultiServer6 {
 		//쓰레드를 사용하기 위해서 run()메서드 재정의
 		@Override
 		public void run()
-		{
+		{		
 			//String s = "";
 			String name = ""; // 클라이언트로부터 받은 이름을 저장할 변수
 			try
 			{
 				name = in.readLine(); //클라이언트에서 처음으로 보내는 메시지는 
 									  //클라이언트가 사용할 이름이다.
-				lst.add(name);
 				sendAllMsg(name + "님이 입장하셨습니다.");
 				//현재 객체가 가지고있는 소켓을 제외하고 다른 소켓(클라이언트)들에게 접속을 알림.
 				clientMap.put(name, out); // 해쉬맵에 키를 name으로 출력스트림 객체를 저장.
@@ -125,9 +123,28 @@ public class MultiServer6 {
 				{
 					s = in.readLine();
 					System.out.println(s);
-					if(s.equals(name+"=>"+"/list"))
+					StringTokenizer st1 = new StringTokenizer(s,"/ ");
+					Set<String> a = clientMap.keySet();
+					if(s.equals("/list"))
+					{			
+						Iterator<String> itr = a.iterator();
+						out.print("현재 접속중인 ID는 ");
+						while(itr.hasNext())
+						{
+							out.print(itr.next()+" ");
+						}
+						System.out.println();
+					}
+					if(st1.nextToken().equals("to"))
 					{
-						out.println(lst);
+						Iterator<String> itr = a.iterator();
+						while(itr.hasNext())
+						{
+							if(itr.next().equals(st1.nextToken()))
+							{
+								out.println(st1.nextToken());
+							}
+						}
 					}
 					if(s.equals("q") || s.equals("Q"))
 						break;

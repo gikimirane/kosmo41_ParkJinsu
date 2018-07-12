@@ -44,7 +44,13 @@ public class Sender5 extends Thread {
 					}
 					else
 					{
-						out.println(name+"=>"+s2);
+//						if(s2.equals("/list"))
+//						{
+//							out.println(s2);
+//						}
+						//else
+							out.println(s2);
+						
 					}
 				}
 				catch(Exception e)

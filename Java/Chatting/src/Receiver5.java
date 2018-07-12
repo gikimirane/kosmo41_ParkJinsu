@@ -41,7 +41,8 @@ public class Receiver5 extends Thread
 				{
 					System.out.println("Thread Receive : " + s);
 				}*/
-				System.out.println("Thread Receive : " + in.readLine());
+				System.out.println(in.readLine());
+				//System.out.println("Thread Receive : " + in.readLine());
 			}
 			catch(java.net.SocketException ne)
 			{
