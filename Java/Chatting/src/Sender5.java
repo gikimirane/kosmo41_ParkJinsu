@@ -1,11 +1,13 @@
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 public class Sender5 extends Thread {
 	
 	Socket socket;
 	PrintWriter out = null;
 	String name;
+	boolean ear = false;
 	
 	//생성자
 	public Sender5(Socket socket, String name)
@@ -36,7 +38,11 @@ public class Sender5 extends Thread {
 				try
 				{
 					String s2 = s.nextLine();
-
+					StringTokenizer str1 = new StringTokenizer(s2," ");
+					
+					
+					
+					
 					if(s2.equals("q") || s2.equals("Q"))
 					{
 						out.println(s2);
@@ -44,13 +50,7 @@ public class Sender5 extends Thread {
 					}
 					else
 					{
-//						if(s2.equals("/list"))
-//						{
-//							out.println(s2);
-//						}
-						//else
-							out.println(s2);
-						
+						out.println(s2);		
 					}
 				}
 				catch(Exception e)

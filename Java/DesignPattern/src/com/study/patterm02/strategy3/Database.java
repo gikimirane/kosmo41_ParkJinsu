@@ -1,4 +1,4 @@
-package com.study.patterm04.strategy3;
+package com.study.patterm02.strategy3;
 
 public abstract class Database {
 	

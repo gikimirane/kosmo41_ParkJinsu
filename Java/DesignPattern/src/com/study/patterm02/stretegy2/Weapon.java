@@ -1,4 +1,4 @@
-package com.study.patterm03.stretegy2;
+package com.study.patterm02.stretegy2;
 
 public interface Weapon {
 	void shoot();

@@ -1,11 +1,11 @@
-package com.study.patterm04.strategy3;
+package com.study.patterm04.factory_method2.Database;
 
+//B 'ConcreteProduct' class
 public class Oracle extends Database {
-	
+
 	public Oracle() {
 		name = "Oracle";
-		rows = 10;
-				
+		rows = 20;
 	}
 
 	@Override

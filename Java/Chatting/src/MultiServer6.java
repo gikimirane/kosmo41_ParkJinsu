@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
 public class MultiServer6 {
 	ServerSocket serverSocket = null;
 	Socket socket = null;
@@ -13,7 +14,6 @@ public class MultiServer6 {
 		clientMap = new HashMap<String, PrintWriter>();
 		//해쉬맵 동기화 설정.
 		Collections.synchronizedMap(clientMap);
-		
 	}
 	
 	public void init()
@@ -69,6 +69,7 @@ public class MultiServer6 {
 			}
 		}
 	}
+	
 
 	public static void main(String[] args) {
 		//서버객체 생성
@@ -101,17 +102,34 @@ public class MultiServer6 {
 				System.out.println("예외:"+e);
 			}
 		}
+		public void sendList()
+		{
+			Set<String> a = clientMap.keySet();
+			Iterator<String> itr = a.iterator();
+			out.println("현재 접속중인 ID는 ");
+			while(itr.hasNext())
+			{
+				out.println(itr.next()+" ");
+			}
+		}
+		public void sendToMsg(String str1, String str2, String st)
+		{
+			
+			PrintWriter out2 = (PrintWriter)clientMap.get(str1);
+			out2.println(str2+"(귓속말)"+str1+" "+st);
+		}
 		
 		//쓰레드를 사용하기 위해서 run()메서드 재정의
 		@Override
 		public void run()
-		{		
+		{
 			//String s = "";
 			String name = ""; // 클라이언트로부터 받은 이름을 저장할 변수
 			try
 			{
 				name = in.readLine(); //클라이언트에서 처음으로 보내는 메시지는 
 									  //클라이언트가 사용할 이름이다.
+				
 				sendAllMsg(name + "님이 입장하셨습니다.");
 				//현재 객체가 가지고있는 소켓을 제외하고 다른 소켓(클라이언트)들에게 접속을 알림.
 				clientMap.put(name, out); // 해쉬맵에 키를 name으로 출력스트림 객체를 저장.
@@ -122,32 +140,27 @@ public class MultiServer6 {
 				while(in != null)
 				{
 					s = in.readLine();
+					StringTokenizer str = new StringTokenizer(s," ");
+					String st1 = str.nextToken();
+					//String st2 = str.nextToken();
 					System.out.println(s);
-					StringTokenizer st1 = new StringTokenizer(s,"/ ");
-					Set<String> a = clientMap.keySet();
-					if(s.equals("/list"))
-					{			
-						Iterator<String> itr = a.iterator();
-						out.print("현재 접속중인 ID는 ");
-						while(itr.hasNext())
-						{
-							out.print(itr.next()+" ");
-						}
-						System.out.println();
-					}
-					if(st1.nextToken().equals("to"))
-					{
-						Iterator<String> itr = a.iterator();
-						while(itr.hasNext())
-						{
-							if(itr.next().equals(st1.nextToken()))
-							{
-								out.println(st1.nextToken());
-							}
-						}
-					}
 					if(s.equals("q") || s.equals("Q"))
+					{
 						break;
+					}
+					else if(st1.equals("/list"))
+					{			
+						sendList();
+					}
+					else if(st1.equals("/to"))
+					{
+						int num1 = s.indexOf(" ");
+						String st = s.substring(num1+1);
+						num1 = st.indexOf(" ");
+						st = st.substring(num1);
+						sendToMsg(str.nextToken(),name,st);
+					}
+					else
 					sendAllMsg(s);
 				}
 				//System.out.println("Bye....");
