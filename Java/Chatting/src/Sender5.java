@@ -2,11 +2,14 @@ import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+import java.util.List;
+import java.util.ArrayList;
 public class Sender5 extends Thread {
 	
 	Socket socket;
 	PrintWriter out = null;
 	String name;
+	String name2;
 	boolean ear = false;
 	
 	//생성자
@@ -38,20 +41,53 @@ public class Sender5 extends Thread {
 				try
 				{
 					String s2 = s.nextLine();
-					StringTokenizer str1 = new StringTokenizer(s2," ");
-					
-					
-					
-					
-					if(s2.equals("q") || s2.equals("Q"))
+					StringTokenizer str = new StringTokenizer(s2," ");
+					List<String> lst = new ArrayList<String>();
+					while(str.hasMoreTokens())
+					{
+						lst.add(str.nextToken());
+					}
+
+					if(lst.get(0).equals("/to") && lst.size() > 2)
 					{
 						out.println(s2);
-						break;
+						
 					}
-					else
+					else if(lst.get(0).equals("/to") &&lst.size() == 2 && ear == false)
 					{
-						out.println(s2);		
+						ear = true;
+						name2 = lst.get(1);
+						this.name2 = name2;
+						
 					}
+					else if(lst.get(0).equals("/to") &&lst.size() == 2 && ear == true)
+					{
+						ear = false;
+					}
+					
+					else if(ear == true)
+					{
+						if(s2.equals("q") || s2.equals("Q"))
+						{
+							//out.println(s2);
+							break;
+						}
+						else
+							out.println("/to"+" "+name2+" "+s2);
+					}
+					else if(ear == false)
+					{
+						if(s2.equals("q") || s2.equals("Q"))
+						{
+							out.println(s2);
+							break;
+						}
+						else
+							out.println(s2);
+					}
+					
+
+					
 				}
 				catch(Exception e)
 				{

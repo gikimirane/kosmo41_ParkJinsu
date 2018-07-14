@@ -161,7 +161,7 @@ public class MultiServer6 {
 						sendToMsg(str.nextToken(),name,st);
 					}
 					else
-					sendAllMsg(s);
+					sendAllMsg(name+" => "+s);
 				}
 				//System.out.println("Bye....");
 			}

@@ -2,7 +2,7 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
-
+/*
 public class test {
 
 	public static void main(String[] args) {
@@ -72,3 +72,4 @@ public class test {
 	}
 	
 }
+*/
