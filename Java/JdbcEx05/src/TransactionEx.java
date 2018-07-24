@@ -38,7 +38,7 @@ public class TransactionEx {
 			pstmt.executeUpdate();
 			System.out.println("22222");
 			
-			sql = "insert into test3 values('손오공', '3333'"; //일부러 에러를 유도
+			sql = "insert into test3 values('손오공', '3333')"; //일부러 에러를 유도
 			pstmt =con.prepareStatement(sql);
 			pstmt.executeUpdate();
 			System.out.println("33333");

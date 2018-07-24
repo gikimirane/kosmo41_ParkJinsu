@@ -10,6 +10,7 @@ public class Quiz01 {
 			System.out.println("숫자를 입력하세요");
 			int num = s.nextInt();
 			sum = sum + num;
+			
 			if(num == 0)
 			{
 				System.out.println("모든 정수들의 합은 " + sum);

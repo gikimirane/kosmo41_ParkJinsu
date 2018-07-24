@@ -51,6 +51,7 @@ public class BatchInsertEx {
 					"VALUES('이지함', '4444')");
 			
 			int [] updateCounts = stmt.executeBatch();
+
 			commit = true;
 			con.commit();
 			
