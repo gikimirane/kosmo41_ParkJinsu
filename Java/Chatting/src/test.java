@@ -1,75 +1,195 @@
-import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.StringTokenizer;
-/*
-public class test {
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+public class test{
+	
+	ServerSocket serverSocket = null;
+	Socket socket = null;
+	Map<String, PrintWriter> clientMap;
+	
+	//생성자
+	public test()
+	{
+		//클라이언트의 출력스트림을 저장할 해쉬맵 생성.
+		clientMap = new HashMap<String, PrintWriter>();
+		//해쉬맵 동기화 설정.
+		Collections.synchronizedMap(clientMap);
+	}
+	
+	public void init()
+	{
+		
+		try
+		{
+			serverSocket = new ServerSocket(9999); //9999포트로 서버소켓 객체생성
+	
+			System.out.println("서버가 시작되었습니다.");
+		
+			while(true)
+			{
+				socket = serverSocket.accept();
+				System.out.println(socket.getInetAddress() + ":"+socket.getPort());
+			
+				Thread msr = new MultiServerT(socket); //쓰레드 생성
+				msr.start(); //쓰레드 시동
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				serverSocket.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}	
+	}
+	
+	//접속된 모든 클라이언트들에게 메시지를 전달.
+	public void sendAllMsg(String msg)
+	{
+		//출력스트림을 순차적으로 얻어와서 해당 메시지를 출력한다.
+		Iterator it = clientMap.keySet().iterator();
+		
+		while(it.hasNext())
+		{
+			try
+			{
+				PrintWriter it_out = (PrintWriter) clientMap.get(it.next());
+				it_out.println(msg);
+			}
+			catch(Exception e)
+			{
+				System.out.println("예외:"+e);
+			}
+		}
+	}
+	
 
 	public static void main(String[] args) {
-		import java.io.*;
-		import java.net.*;
-		import java.util.Scanner;
+		//서버객체 생성
+		MultiServer6 ms = new MultiServer6();
+		ms.init();
 
-		public class Sender5 extends Thread{
-
-			Socket socket;
-			PrintWriter out = null;
-			String name = "";
-			Boolean talkToOne = false;
-			String tName = "";
-
-			public Sender5(Socket socket, String name) {
-				this.socket = socket;
-				try {
-					out = new PrintWriter(socket.getOutputStream(), true);	
-					this.name = name;
-				}catch(Exception e) {
+	}
+	
+	////////////////////////////////////////////////////////////////
+	//내부 클래스
+	//클라이언트로부터 읽어온 메시지를 다른 클라이언트(socket)에 보내는 역할을 하는 메서드
+	class MultiServerT extends Thread
+	{
+		Socket socket;
+		PrintWriter out = null;
+		BufferedReader in = null;
+		
+		//생성자
+		public MultiServerT(Socket socket)
+		{
+			this.socket = socket;
+			try
+			{
+				out = new PrintWriter(this.socket.getOutputStream(), true);
+				in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+				
+			}
+			catch(Exception e)
+			{
+				System.out.println("예외:"+e);
+			}
+		}
+		public void sendList()
+		{
+			Set<String> a = clientMap.keySet();
+			Iterator<String> itr = a.iterator();
+			out.println("현재 접속중인 ID는 ");
+			while(itr.hasNext())
+			{
+				out.println(itr.next()+" ");
+			}
+		}
+		public void sendToMsg(String str1, String str2, String st)
+		{
+			
+			PrintWriter out2 = (PrintWriter)clientMap.get(str1);
+			out2.println(str2+"(귓속말)"+str1+" "+st);
+		}
+		
+		//쓰레드를 사용하기 위해서 run()메서드 재정의
+		@Override
+		public void run()
+		{
+			//String s = "";
+			String name = ""; // 클라이언트로부터 받은 이름을 저장할 변수
+			try
+			{
+				name = in.readLine(); //클라이언트에서 처음으로 보내는 메시지는 
+									  //클라이언트가 사용할 이름이다.
+				
+				sendAllMsg(name + "님이 입장하셨습니다.");
+				//현재 객체가 가지고있는 소켓을 제외하고 다른 소켓(클라이언트)들에게 접속을 알림.
+				clientMap.put(name, out); // 해쉬맵에 키를 name으로 출력스트림 객체를 저장.
+				System.out.println("현재 접속자 수는 " + clientMap.size()+"명 입니다.");
+				
+				//입력스트림이 null이 아니면 반복
+				String s = "";
+				while(in != null)
+				{
+					s = in.readLine();
+					StringTokenizer str = new StringTokenizer(s," ");
+					String st1 = str.nextToken();
+					//String st2 = str.nextToken();
+					System.out.println(s);
+					if(s.equals("q") || s.equals("Q"))
+					{
+						break;
+					}
+					else if(st1.equals("/list"))
+					{			
+						sendList();
+					}
+					else if(st1.equals("/to"))
+					{
+						int num1 = s.indexOf(" ");
+						String st = s.substring(num1+1);
+						num1 = st.indexOf(" ");
+						st = st.substring(num1);
+						sendToMsg(str.nextToken(),name,st);
+					}
+					else
+					sendAllMsg(name+" => "+s);
+				}
+				//System.out.println("Bye....");
+			}
+			catch(Exception e)
+			{
+				System.out.println("예외:"+e);
+			}
+			finally
+			{
+				//예외가 발생할때 퇴장. 해쉬맵에서 해당 데이터 제거.
+				//보통 종료하거나 나가면 java.net.SocketException: 예외발생
+				clientMap.remove(name);
+				sendAllMsg(name + "님이 퇴장하셨습니다.");
+				System.out.println("현재 접속자 수는 " + clientMap.size()+ "명입니다");
+				
+				try
+				{
+					in.close();
+					out.close();
+					socket.close();
+				}
+				catch(Exception e)
+				{
 					e.printStackTrace();
 				}
 			}
-				
-			@Override
-			public void run() {
-				Scanner s = new Scanner(System.in);
-				try {
-					out.println(name);
-					while (out != null) {
-						try {
-							String s2 = s.nextLine();
-							
-							if(s2.equalsIgnoreCase("q")) {
-								//out.println(s2);
-								break;
-							}else { 
-								String[] splt = s2.split(" ");
-								
-								if(splt[0].equals("/to") && splt.length>2 && !talkToOne) 		
-										out.println(name + "=>" + s2);
-								else if(splt[0].equals("/to") && splt.length == 2 && !talkToOne) {	
-										talkToOne = true;
-										tName = splt[1];
-								}
-								else if(splt[0].equals("/to") && splt.length == 2 && talkToOne)	
-										talkToOne = false;
-								else if(talkToOne)	out.println(name + "=>" + "/to " + tName + " " + s2);
-								else	out.println(name + "=>" + s2);
-							}
-						}catch(Exception e) {
-							e.printStackTrace();
-						}
-					}
-					out.close();
-					socket.close();	
-				}catch(Exception e) {
-					e.printStackTrace();
-				}	
-			}
 		}
-
-
-
-	
 	}
-	
 }
-*/

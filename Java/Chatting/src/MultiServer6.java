@@ -3,6 +3,7 @@ import java.net.*;
 import java.util.*;
 
 public class MultiServer6 {
+	
 	ServerSocket serverSocket = null;
 	Socket socket = null;
 	Map<String, PrintWriter> clientMap;
@@ -22,6 +23,7 @@ public class MultiServer6 {
 		try
 		{
 			serverSocket = new ServerSocket(9999); //9999포트로 서버소켓 객체생성
+	
 			System.out.println("서버가 시작되었습니다.");
 		
 			while(true)
@@ -127,9 +129,10 @@ public class MultiServer6 {
 			String name = ""; // 클라이언트로부터 받은 이름을 저장할 변수
 			try
 			{
+				
 				name = in.readLine(); //클라이언트에서 처음으로 보내는 메시지는 
 									  //클라이언트가 사용할 이름이다.
-				
+							
 				sendAllMsg(name + "님이 입장하셨습니다.");
 				//현재 객체가 가지고있는 소켓을 제외하고 다른 소켓(클라이언트)들에게 접속을 알림.
 				clientMap.put(name, out); // 해쉬맵에 키를 name으로 출력스트림 객체를 저장.
