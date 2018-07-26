@@ -1,15 +1,16 @@
 /*콘솔 멀티채팅 믈라이언트 프로그램*/
 import java.io.*;
 import java.net.*;
+import java.sql.*;
 import java.util.Scanner;
 
 public class MultiClient5 {
 
 	public static void main(String[] args) {
+		
 		System.out.println("이름을 입력하세요");
 		Scanner s = new Scanner(System.in);
 		String s_name = s.nextLine();
-		
 		try
 		{
 			//String ServerIP = "localhost";

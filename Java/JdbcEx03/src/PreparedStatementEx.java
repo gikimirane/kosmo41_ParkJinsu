@@ -19,7 +19,7 @@ public class PreparedStatementEx {
 
 
 	public static void main(String[] args) {
-		
+		String name = "aaaa";
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -39,7 +39,7 @@ public class PreparedStatementEx {
 			//--------------------------------------------------------
 			sql = "insert into test2 values(?, ?)";
 			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, "홍길동");
+			pstmt.setString(1, name);
 			pstmt.setString(2, "1111");
 			updateCount = pstmt.executeUpdate();
 			System.out.println("insert Count : " + updateCount);
@@ -47,6 +47,7 @@ public class PreparedStatementEx {
 			sql = "select * from test2";
 			pstmt = con.prepareStatement(sql);
 			rs = pstmt.executeQuery();
+
 			while(rs.next())
 			{
 				System.out.print("id : " + rs.getString(1));
@@ -58,7 +59,7 @@ public class PreparedStatementEx {
 			pstmt = con.prepareStatement(sql);
 			updateCount = pstmt.executeUpdate();
 			System.out.println("dropCount : " + updateCount);
-			
+//			
 		}
 		catch (SQLException sqle)
 		{

@@ -1,5 +1,10 @@
 import java.io.*;
 import java.net.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 public class MultiServer6 {
@@ -85,10 +90,20 @@ public class MultiServer6 {
 	//클라이언트로부터 읽어온 메시지를 다른 클라이언트(socket)에 보내는 역할을 하는 메서드
 	class MultiServerT extends Thread
 	{
+		private String noThread = "00";
 		Socket socket;
 		PrintWriter out = null;
 		BufferedReader in = null;
-		
+		MultiClient5 cli = new MultiClient5();
+		Scanner s = new Scanner(System.in);
+		 MultiServerT(int n)
+		{
+			if(n<10)
+				noThread = "0" + n;
+			else
+				noThread = "" + n;
+		}
+
 		//생성자
 		public MultiServerT(Socket socket)
 		{
@@ -104,7 +119,7 @@ public class MultiServer6 {
 				System.out.println("예외:"+e);
 			}
 		}
-		public void sendList()
+		public void sendList() // 리스트
 		{
 			Set<String> a = clientMap.keySet();
 			Iterator<String> itr = a.iterator();
@@ -114,26 +129,63 @@ public class MultiServer6 {
 				out.println(itr.next()+" ");
 			}
 		}
-		public void sendToMsg(String str1, String str2, String st)
+		public void sendToMsg(String str1, String str2, String st)// 귓속말
 		{
 			
 			PrintWriter out2 = (PrintWriter)clientMap.get(str1);
 			out2.println(str2+"(귓속말)"+str1+" "+st);
 		}
+		public String existName(Connection con)// 중복 아이디 체크
+		{
+			String name = "";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			String sql = null;
+			while(true) 
+			{		
+				try
+				{		
+					name = in.readLine(); 
+					name = URLDecoder.decode(name, "UTF-8");
+					sql = "insert into member(id) values('" + name +"')";
+					pstmt = con.prepareStatement(sql);
+					pstmt.executeUpdate();
+					break;
+				}
+				catch(Exception e)
+				{
+					out.println("중복입니다");
+					out.println("다른 이름을 입력하세요");	
+				}
+			}
+			return name;
+			
+			
+		}
 		
 		//쓰레드를 사용하기 위해서 run()메서드 재정의
 		@Override
 		public void run()
-		{
+		{			
 			//String s = "";
 			String name = ""; // 클라이언트로부터 받은 이름을 저장할 변수
+
 			try
 			{
+				Connection con = ConnectionPool.getConnection("env " +noThread);
+
+				PreparedStatement pstmt = null;
+				ResultSet rs = null;
+				String sql = null;
+	
+				ConnectionPool.listCacheInfos();
 				
-				name = in.readLine(); //클라이언트에서 처음으로 보내는 메시지는 
+				//클라이언트에서 처음으로 보내는 메시지는 
 									  //클라이언트가 사용할 이름이다.
-							
+				name = existName(con); //중복 아이디 체크
+										
 				sendAllMsg(name + "님이 입장하셨습니다.");
+				
 				//현재 객체가 가지고있는 소켓을 제외하고 다른 소켓(클라이언트)들에게 접속을 알림.
 				clientMap.put(name, out); // 해쉬맵에 키를 name으로 출력스트림 객체를 저장.
 				System.out.println("현재 접속자 수는 " + clientMap.size()+"명 입니다.");
@@ -166,20 +218,26 @@ public class MultiServer6 {
 					else
 					sendAllMsg(name+" => "+s);
 				}
-				//System.out.println("Bye....");
+				sql = "delete member where id = '"+name+"'";
+				pstmt = con.prepareStatement(sql);
+				pstmt.executeUpdate();
+				pstmt.close();
+				con.close();
 			}
 			catch(Exception e)
 			{
-				System.out.println("예외:"+e);
+				System.out.println("예외1:"+e);
 			}
 			finally
 			{
 				//예외가 발생할때 퇴장. 해쉬맵에서 해당 데이터 제거.
 				//보통 종료하거나 나가면 java.net.SocketException: 예외발생
+				
 				clientMap.remove(name);
 				sendAllMsg(name + "님이 퇴장하셨습니다.");
 				System.out.println("현재 접속자 수는 " + clientMap.size()+ "명입니다");
 				
+	
 				try
 				{
 					in.close();
@@ -189,6 +247,25 @@ public class MultiServer6 {
 				catch(Exception e)
 				{
 					e.printStackTrace();
+				}
+				try
+				{
+					Connection con = ConnectionPool.getConnection("env " +noThread);
+
+					PreparedStatement pstmt = null;
+					ResultSet rs = null;
+					String sql = null;
+		
+					ConnectionPool.listCacheInfos();
+					sql = "delete member where id = '"+name+"'";
+					pstmt = con.prepareStatement(sql);
+					pstmt.executeUpdate();
+					pstmt.close();
+					con.close();
+				}
+				catch(Exception e)
+				{
+					System.out.println("예외1:"+e);
 				}
 			}
 		}
