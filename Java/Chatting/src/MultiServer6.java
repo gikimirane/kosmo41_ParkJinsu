@@ -1,17 +1,27 @@
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 public class MultiServer6 {
-	
+	private String noThread = "00";
 	ServerSocket serverSocket = null;
 	Socket socket = null;
 	Map<String, PrintWriter> clientMap;
+	
 	
 	//생성자
 	public MultiServer6()
@@ -58,7 +68,7 @@ public class MultiServer6 {
 	}
 	
 	//접속된 모든 클라이언트들에게 메시지를 전달.
-	public void sendAllMsg(String msg)
+	public void sendAllMsg(String msg,String name)
 	{
 		//출력스트림을 순차적으로 얻어와서 해당 메시지를 출력한다.
 		Iterator it = clientMap.keySet().iterator();
@@ -67,6 +77,22 @@ public class MultiServer6 {
 		{
 			try
 			{
+				Connection con = ConnectionPool.getConnection("env " +noThread);
+				PreparedStatement pstmt = null;
+				ResultSet rs = null;
+				String sql = null;
+				ConnectionPool.listCacheInfos();
+				sql = "select * from block where blocking = '"+name+"'";
+				pstmt = con.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				
+				while(rs.next())
+				{
+					if(name.equals(rs.getString("blocking")))
+					{
+						
+					}
+				}
 				PrintWriter it_out = (PrintWriter) clientMap.get(it.next());
 				it_out.println(msg);
 			}
@@ -135,21 +161,20 @@ public class MultiServer6 {
 			PrintWriter out2 = (PrintWriter)clientMap.get(str1);
 			out2.println(str2+"(귓속말)"+str1+" "+st);
 		}
-		public String existName(Connection con)// 중복 아이디 체크
+		public String existName(Connection con, PreparedStatement pstmt, ResultSet rs, String sql)// 중복 아이디 체크
 		{
 			String name = "";
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			String sql = null;
-			while(true) 
-			{		
+			while(true)
+			{
 				try
 				{		
-					name = in.readLine(); 
-					name = URLDecoder.decode(name, "UTF-8");
+//					name = in.readLine(); 
+//					name = URLDecoder.decode(name, "UTF-8");
+					name = blackList(con, pstmt, rs, sql);
 					sql = "insert into member(id) values('" + name +"')";
 					pstmt = con.prepareStatement(sql);
 					pstmt.executeUpdate();
+					
 					break;
 				}
 				catch(Exception e)
@@ -157,9 +182,66 @@ public class MultiServer6 {
 					out.println("중복입니다");
 					out.println("다른 이름을 입력하세요");	
 				}
+
+			}
+				
+			return name;
+		}
+		public String blackList(Connection con, PreparedStatement pstmt, ResultSet rs, String sql) //블랙리스트 처리
+		{
+			String name = "";
+			int a = 0;
+			while(true)
+			{
+				try
+				{		
+					name = in.readLine(); 
+					name = URLDecoder.decode(name, "UTF-8");
+					sql = "select blacklist from member where blacklist = '"+name+"'";
+					pstmt = con.prepareStatement(sql);
+					rs = pstmt.executeQuery();
+					a = 0;
+					while(rs.next())
+					{
+						if(name.equals(rs.getString(1)))
+						{
+							out.println("블랙리스트입니다");
+							out.println("나가세요");
+							a++;
+							break;
+						}
+						
+					}
+					if(a == 0)
+					{
+						break;
+					}
+					
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
 			}
 			return name;
 			
+		
+		}
+		public void exit(Connection con, PreparedStatement pstmt, ResultSet rs, String sql, String name) // 종료
+
+		{
+			try
+			{
+				sql = "delete member where id = '"+name+"'";
+				pstmt = con.prepareStatement(sql);
+				pstmt.executeUpdate();
+				pstmt.close();
+				con.close();
+			}
+			catch(Exception e)
+			{
+				System.out.println("예외1:"+e);
+			}
 			
 		}
 		
@@ -169,22 +251,19 @@ public class MultiServer6 {
 		{			
 			//String s = "";
 			String name = ""; // 클라이언트로부터 받은 이름을 저장할 변수
-
 			try
 			{
 				Connection con = ConnectionPool.getConnection("env " +noThread);
-
 				PreparedStatement pstmt = null;
 				ResultSet rs = null;
 				String sql = null;
-	
-				ConnectionPool.listCacheInfos();
-				
+				ConnectionPool.listCacheInfos();			
 				//클라이언트에서 처음으로 보내는 메시지는 
 									  //클라이언트가 사용할 이름이다.
-				name = existName(con); //중복 아이디 체크
-										
-				sendAllMsg(name + "님이 입장하셨습니다.");
+											
+				name = existName(con,pstmt,rs,sql); //중복 아이디 체크, 블랙리스트 체크
+													
+				sendAllMsg(name + "님이 입장하셨습니다.",name);
 				
 				//현재 객체가 가지고있는 소켓을 제외하고 다른 소켓(클라이언트)들에게 접속을 알림.
 				clientMap.put(name, out); // 해쉬맵에 키를 name으로 출력스트림 객체를 저장.
@@ -199,15 +278,15 @@ public class MultiServer6 {
 					String st1 = str.nextToken();
 					//String st2 = str.nextToken();
 					System.out.println(s);
-					if(s.equals("q") || s.equals("Q"))
+					if(s.equals("q") || s.equals("Q")) //종료
 					{
 						break;
 					}
-					else if(st1.equals("/list"))
+					else if(st1.equals("/list")) //리스트
 					{			
 						sendList();
 					}
-					else if(st1.equals("/to"))
+					else if(st1.equals("/to"))// 귓속말
 					{
 						int num1 = s.indexOf(" ");
 						String st = s.substring(num1+1);
@@ -215,14 +294,19 @@ public class MultiServer6 {
 						st = st.substring(num1);
 						sendToMsg(str.nextToken(),name,st);
 					}
+					else if(st1.equals("/bk"))
+					{
+						int num1 = s.indexOf(" ");
+						String st = s.substring(num1+1);
+						sql = "insert into block values('"+name+"','"+st+"')";
+						pstmt = con.prepareStatement(sql);
+						pstmt.executeUpdate();
+						sendAllMsg(name+" => "+s,name);
+					}
 					else
-					sendAllMsg(name+" => "+s);
+					sendAllMsg(name+" => "+s,name);
 				}
-				sql = "delete member where id = '"+name+"'";
-				pstmt = con.prepareStatement(sql);
-				pstmt.executeUpdate();
-				pstmt.close();
-				con.close();
+				exit(con,pstmt,rs,sql,name);
 			}
 			catch(Exception e)
 			{
@@ -232,9 +316,21 @@ public class MultiServer6 {
 			{
 				//예외가 발생할때 퇴장. 해쉬맵에서 해당 데이터 제거.
 				//보통 종료하거나 나가면 java.net.SocketException: 예외발생
-				
+				try
+				{ // 강제 종료시 삭제
+					Connection con = ConnectionPool.getConnection("env " +noThread);
+
+					PreparedStatement pstmt = null;
+					ResultSet rs = null;
+					String sql = null;
+					exit(con,pstmt,rs,sql,name);
+				}
+				catch(Exception e)
+				{
+					System.out.println("예외1:"+e);
+				}
 				clientMap.remove(name);
-				sendAllMsg(name + "님이 퇴장하셨습니다.");
+				sendAllMsg(name + "님이 퇴장하셨습니다.",name);
 				System.out.println("현재 접속자 수는 " + clientMap.size()+ "명입니다");
 				
 	
