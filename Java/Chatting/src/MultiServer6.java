@@ -41,6 +41,7 @@ public class MultiServer6 {
 		
 		try
 		{
+
 			serverSocket = new ServerSocket(9999); //9999포트로 서버소켓 객체생성
 	
 			System.out.println("서버가 시작되었습니다.");
@@ -72,19 +73,19 @@ public class MultiServer6 {
 	}
 	
 	//접속된 모든 클라이언트들에게 메시지를 전달.
-	public void sendAllMsg(String msg,String name, String sp)
-	{				
-		Set<String> idset = new HashSet<>();
-		Set<String> blockset = new HashSet<>();
-		Set<String> cha = new HashSet<>();
+	public void sendAllMsg(String msg,String name)
+	{		
+
 		try
 		{
-			Connection con = ConnectionPool.getConnection("env " +noThread);
+			Connection con = ConnectionPool.getConnection();
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
-			String sql = null;
-			ConnectionPool.listCacheInfos();
-			
+			String sql = null;		
+			Set<String> idset = new HashSet<>();
+			Set<String> blockset = new HashSet<>();
+			Set<String> cha = new HashSet<>();
+//-------------------------------------------------------------------------------------------			
 			sql = "select id from block where blocking = '"+ name +"'";
 			pstmt = con.prepareStatement(sql);
 			rs = pstmt.executeQuery();
@@ -92,6 +93,10 @@ public class MultiServer6 {
 			{
 				blockset.add(rs.getString(1));
 			}
+			rs.close();
+			pstmt.close();
+			con.close();
+//---------------------------------------------------------------------------------------------			
 			Set<String> key = clientMap.keySet();
 			Iterator<String> it = key.iterator();
 			while(it.hasNext())
@@ -124,10 +129,6 @@ public class MultiServer6 {
 				}
 			}
 			
-
-			rs.close();
-			pstmt.close();
-			con.close();
 		}
 		catch(Exception e)
 		{
@@ -192,67 +193,82 @@ public class MultiServer6 {
 			PrintWriter out2 = (PrintWriter)clientMap.get(str1);
 			out2.println(str2+"(귓속말)"+str1+" "+st);
 		}
-		public void block(String msg, String name)
+		public void block(String msg, String name)//block
 		{
 			PrintWriter out2 = (PrintWriter)clientMap.get(name);
 			out2.println(msg);
 		}
-		public void noMsg(String str, String name, Connection con, PreparedStatement pstmt, ResultSet rs)
+		public void noMsg(String str, String name, Connection con, PreparedStatement pstmt, ResultSet rs) //개인 금칙어
 		{
 			try
 			{
 				int num1 = str.indexOf(" ");
 				String st = str.substring(num1+1);
-				String sql = "insert into nomsg(personer,id) values('" + st +"','"+ name + "')";
+				String sql = "insert into nomsg(personal,id) values('" + st +"','"+ name + "')";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
+				rs.close();
+				pstmt.close();
+				con.close();
 			}
-			catch(Exception e)
+			catch(SQLException e)
 			{
 				e.printStackTrace();
 			}
 			
 		}
-		public String existName(Connection con, PreparedStatement pstmt, ResultSet rs, String sql)// 중복 아이디 체크
+		public String existName()// 중복 아이디 체크
 		{
 			String name = "";
 			while(true)
 			{
+				name = blackList();
+			
 				try
-				{		
+				{	
+					Connection con = ConnectionPool.getConnection();	
+					PreparedStatement pstmt = null;
+					String sql = null;		
 //					name = in.readLine(); 
 //					name = URLDecoder.decode(name, "UTF-8");
-					name = blackList(con, pstmt, rs, sql);
+					
 					sql = "insert into member(id) values('" + name +"')";
 					pstmt = con.prepareStatement(sql);
-					pstmt.executeUpdate();
-					
+					pstmt.executeUpdate();	
+
+					if(pstmt != null) pstmt.close();
+					if(con != null)con.close();
+
 					break;
 				}
-				catch(Exception e)
+				catch(SQLException e)
 				{
 					out.println("중복입니다");
 					out.println("다른 이름을 입력하세요");	
-				}
-
+				}	
 			}
-				
+			
 			return name;
 		}
-		public String blackList(Connection con, PreparedStatement pstmt, ResultSet rs, String sql) //블랙리스트 처리
+		public String blackList() //블랙리스트 처리
 		{
 			String name = "";
-			int a = 0;
-			while(true)
+
+			try
 			{
-				try
-				{		
+
+				while(true)
+				{	
+					Connection con = ConnectionPool.getConnection();
+					PreparedStatement pstmt = null;
+					ResultSet rs = null;
+					String sql = null;	
 					name = in.readLine(); 
-					name = URLDecoder.decode(name, "UTF-8");
+					//name = URLDecoder.decode(name, "UTF-8");
 					sql = "select blacklist from member where blacklist = '"+name+"'";
 					pstmt = con.prepareStatement(sql);
 					rs = pstmt.executeQuery();
-					a = 0;
+					int a = 0;
 					
 					while(rs.next())
 					{
@@ -261,76 +277,93 @@ public class MultiServer6 {
 							out.println("블랙리스트입니다");
 							out.println("나가세요");
 							a++;
+							rs.close();
+							pstmt.close();
+							con.close();
 							break;
 						}
 						
 					}
+					
 					if(a == 0)
 					{
+						rs.close();
+						pstmt.close();
+						con.close();
 						break;
 					}
 					
 				}
-				catch(Exception e)
-				{
-					e.printStackTrace();
-				}
+				
+			}
+			catch(Exception e)
+			{
+				System.out.println("error");
+				e.printStackTrace();
 			}
 			return name;
 			
 		
 		}
-		public void exit(Connection con, PreparedStatement pstmt, ResultSet rs, String sql, String name) // 종료
+		public void exit(String name) // 종료
 
 		{
 			try
 			{
+				Connection con = ConnectionPool.getConnection();
+				PreparedStatement pstmt = null;
+				//ResultSet rs = null;
+				String sql = null;	
 				sql = "delete member where id = '"+name+"'";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
+				pstmt.close();
+//				con.close();
+//				con = ConnectionPool.getConnection();
 				sql = "delete block where id = '"+name+"'";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
+				//rs.close();
 				pstmt.close();
 				con.close();
 			}
-			catch(Exception e)
+			catch(SQLException e)
 			{
 				System.out.println("예외1:"+e);
 			}
 			
 		}
 		//쓰레드를 사용하기 위해서 run()메서드 재정의
+
 		@Override
 		public void run()
 		{			
 			//String s = "";
-			String no = "";
 			String name = ""; // 클라이언트로부터 받은 이름을 저장할 변수
 			try
 			{
-				Connection con = ConnectionPool.getConnection("env " +noThread);
-				PreparedStatement pstmt = null;
-				ResultSet rs = null;
-				String sql = null;
-				ConnectionPool.listCacheInfos();			
-											
-				name = existName(con,pstmt,rs,sql); //중복 아이디 체크, 블랙리스트 체크
-				
-				sendAllMsg(name + "님이 입장하셨습니다.",name,no);
+												
+				name = existName(); //중복 아이디 체크, 블랙리스트 체크
+				sendAllMsg(name + "님이 입장하셨습니다.",name);
 
 				//현재 객체가 가지고있는 소켓을 제외하고 다른 소켓(클라이언트)들에게 접속을 알림.
 				clientMap.put(name, out); // 해쉬맵에 키를 name으로 출력스트림 객체를 저장.
 				System.out.println("현재 접속자 수는 " + clientMap.size()+"명 입니다.");
-				
 				//입력스트림이 null이 아니면 반복
 				String s = "";
-				String sp = "";
+				
+//				Connection con = ConnectionPool.getConnection();
+				
 				while(in != null)
 				{
+					Connection con = ConnectionPool.getConnection();
+					PreparedStatement pstmt = null;
+					ResultSet rs = null;
+					String sql = null;	
+//					con = ConnectionPool.getConnection();
+					ConnectionPool.listCacheInfos();
 					s = in.readLine();
 					String yok = "";
-					boolean msg = false;
 					StringTokenizer str = new StringTokenizer(s," ");
 					String st1 = str.nextToken();
 					//String st2 = str.nextToken();
@@ -343,27 +376,21 @@ public class MultiServer6 {
 					{
 						yok = s.replace(rs.getString(1), "****");
 						s = yok;
-					}
-					
-					sql = "select personer from nomsg where id = '" + name + "'";
-					pstmt = con.prepareStatement(sql);
-					rs = pstmt.executeQuery();
-					while(rs.next())
-					{
-						if(msg == false)
+						sql = "select personal from nomsg where id = '"+name+"'";
+						pstmt = con.prepareStatement(sql);
+						rs = pstmt.executeQuery();
+						while(rs.next())
 						{
-							yok = s.replace(rs.getString(1), "xxxxx");
-							sp = yok;
-							msg = true;
+							yok = s.replace(rs.getString(1), "xxxx");
+							s = yok;
 						}
-						else
-						{
-							yok = sp.replace(rs.getString(1), "xxxxx");
-							sp = yok;
-						}
-						
 					}
+
 					
+					rs.close();
+					pstmt.close();
+					con.close();
+					System.out.println("nonononono");
 					if(s.equals("q") || s.equals("Q")) //종료
 					{
 						break;
@@ -382,6 +409,10 @@ public class MultiServer6 {
 					}
 					else if(st1.equals("/bk"))
 					{
+						con = ConnectionPool.getConnection();
+						pstmt = null;
+						rs = null;
+						sql = null;
 						int num1 = s.indexOf(" ");
 						String st = s.substring(num1+1);
 						sql = "insert into block values('"+name+"','"+st+"')";
@@ -400,10 +431,28 @@ public class MultiServer6 {
 							}
 						}
 						block("/bk " + st,name);
+						if(rs != null) rs.close();
+						if(pstmt != null) pstmt.close();
+						if(con != null)con.close();
 					}
 					else if(st1.equals("/ng"))
 					{
-						noMsg(s,name,con,pstmt,rs);
+						try
+						{
+							con = ConnectionPool.getConnection();
+							pstmt = null;
+							rs = null;
+							sql = null;
+							noMsg(s,name,con,pstmt,rs);
+							if(rs != null) rs.close();
+							if(pstmt != null) pstmt.close();
+							if(con != null)con.close();
+						}
+						catch(SQLException e)
+						{
+							e.printStackTrace();
+						}
+						
 //						int num1 = s.indexOf(" ");
 //						String st = s.substring(num1+1);
 //						sql = "insert into nomsg(personer,id) values('" + st +"','"+ name + "')";
@@ -412,11 +461,16 @@ public class MultiServer6 {
 					}
 					else
 					{
-						sendAllMsg(name+" => "+s,name,name+" => "+sp);
+						sendAllMsg(name+" => "+s,name);
+
 					}
-					
+					if(rs != null) rs.close();
+					if(pstmt != null) pstmt.close();
+					if(con != null)con.close();
 				}
-				exit(con,pstmt,rs,sql,name);
+				
+				
+				exit(name);
 			}
 			catch(Exception e)
 			{
@@ -424,24 +478,24 @@ public class MultiServer6 {
 			}
 			finally
 			{
+				
 				//예외가 발생할때 퇴장. 해쉬맵에서 해당 데이터 제거.
 				//보통 종료하거나 나가면 java.net.SocketException: 예외발생
 				try
 				{ // 강제 종료시 삭제
-					Connection con = ConnectionPool.getConnection("env " +noThread);
 
-					PreparedStatement pstmt = null;
-					ResultSet rs = null;
-					String sql = null;
-					exit(con,pstmt,rs,sql,name);
+					exit(name);
+//					Connection con = ConnectionPool.getConnection();
+					clientMap.remove(name);
+					sendAllMsg(name + "님이 퇴장하셨습니다.",name);
+					System.out.println("현재 접속자 수는 " + clientMap.size()+ "명입니다");
+					
 				}
 				catch(Exception e)
 				{
 					System.out.println("예외1:"+e);
 				}
-				clientMap.remove(name);
-				sendAllMsg(name + "님이 퇴장하셨습니다.",name,no);
-				System.out.println("현재 접속자 수는 " + clientMap.size()+ "명입니다");
+				
 				
 	
 				try
@@ -454,25 +508,26 @@ public class MultiServer6 {
 				{
 					e.printStackTrace();
 				}
-				try
-				{
-					Connection con = ConnectionPool.getConnection("env " +noThread);
-
-					PreparedStatement pstmt = null;
-					ResultSet rs = null;
-					String sql = null;
-		
-					ConnectionPool.listCacheInfos();
-					sql = "delete member where id = '"+name+"'";
-					pstmt = con.prepareStatement(sql);
-					pstmt.executeUpdate();
-					pstmt.close();
-					con.close();
-				}
-				catch(Exception e)
-				{
-					System.out.println("예외1:"+e);
-				}
+//				try
+//				{
+//					Connection con = ConnectionPool.getConnection();
+//
+//					PreparedStatement pstmt = null;
+//	
+//					String sql = null;
+//		
+//					ConnectionPool.listCacheInfos();
+//					sql = "delete member where id = '"+name+"'";
+//					pstmt = con.prepareStatement(sql);
+//					pstmt.executeUpdate();
+//
+//					pstmt.close();
+//					con.close();
+//				}
+//				catch(SQLException e)
+//				{
+//					System.out.println("예외1:"+e);
+//				}
 			}
 		}
 	}
