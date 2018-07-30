@@ -220,34 +220,32 @@ public class MultiServer6 {
 		public String existName()// 중복 아이디 체크
 		{
 			String name = "";
+			
 			while(true)
 			{
 				name = blackList();
-			
+				
 				try
 				{	
-					Connection con = ConnectionPool.getConnection();	
+					Connection con = ConnectionPool.getConnection();
 					PreparedStatement pstmt = null;
+					ResultSet rs = null;
 					String sql = null;		
 //					name = in.readLine(); 
 //					name = URLDecoder.decode(name, "UTF-8");
-					
 					sql = "insert into member(id) values('" + name +"')";
 					pstmt = con.prepareStatement(sql);
 					pstmt.executeUpdate();	
-
-					if(pstmt != null) pstmt.close();
-					if(con != null)con.close();
-
+					pstmt.close();
+					con.close();
 					break;
 				}
 				catch(SQLException e)
 				{
 					out.println("중복입니다");
-					out.println("다른 이름을 입력하세요");	
+					out.println("다시 입력하세요");
 				}	
 			}
-			
 			return name;
 		}
 		public String blackList() //블랙리스트 처리
@@ -272,16 +270,14 @@ public class MultiServer6 {
 					
 					while(rs.next())
 					{
-						if(name.equals(rs.getString(1)))
-						{
-							out.println("블랙리스트입니다");
-							out.println("나가세요");
-							a++;
-							rs.close();
-							pstmt.close();
-							con.close();
-							break;
-						}
+						out.println(rs.getString(1)+ "는 블랙리스트입니다");
+						out.println("나가세요");
+						a++;
+						rs.close();
+						pstmt.close();
+						con.close();
+						break;
+						
 						
 					}
 					
@@ -342,7 +338,10 @@ public class MultiServer6 {
 			String name = ""; // 클라이언트로부터 받은 이름을 저장할 변수
 			try
 			{
-												
+				Connection con = ConnectionPool.getConnection();
+				PreparedStatement pstmt = null;
+				ResultSet rs = null;
+				String sql = null;
 				name = existName(); //중복 아이디 체크, 블랙리스트 체크
 				sendAllMsg(name + "님이 입장하셨습니다.",name);
 
@@ -356,10 +355,10 @@ public class MultiServer6 {
 				
 				while(in != null)
 				{
-					Connection con = ConnectionPool.getConnection();
-					PreparedStatement pstmt = null;
-					ResultSet rs = null;
-					String sql = null;	
+					con = ConnectionPool.getConnection();
+					pstmt = null;
+					rs = null;
+					sql = null;	
 //					con = ConnectionPool.getConnection();
 					ConnectionPool.listCacheInfos();
 					s = in.readLine();
