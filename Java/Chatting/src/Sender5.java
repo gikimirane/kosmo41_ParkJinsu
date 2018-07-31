@@ -50,7 +50,7 @@ public class Sender5 extends Thread {
 
 					if(lst.get(0).equals("/to") && lst.size() > 2)
 					{
-						out.println(s2);
+						out.println(URLEncoder.encode(s2, "UTF-8"));
 						
 					}
 					else if(lst.get(0).equals("/to") &&lst.size() == 2 && ear == false)
@@ -79,17 +79,17 @@ public class Sender5 extends Thread {
 					{
 						if(s2.equals("q") || s2.equals("Q"))
 						{
-							out.println(s2);
+							out.println(URLEncoder.encode(s2, "UTF-8"));
 							break;
 						}
 						else
-							out.println(s2);
+							out.println(URLEncoder.encode(s2, "UTF-8"));
 					}
 					
 
 					
 				}
-				catch(Exception e)
+				catch(UnsupportedEncodingException e)
 				{
 					System.out.println("예외S1:"+e);
 				}

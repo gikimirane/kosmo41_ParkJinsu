@@ -14,7 +14,7 @@ public class Receiver5 extends Thread
 		
 		try 
 		{
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream(),"UTF-8"));
 		}
 		catch(Exception e)
 		{
@@ -41,7 +41,7 @@ public class Receiver5 extends Thread
 				{
 					System.out.println("Thread Receive : " + s);
 				}*/
-				System.out.println(in.readLine());
+				System.out.println(URLDecoder.decode(in.readLine(), "UTF-8"));
 				//System.out.println("Thread Receive : " + in.readLine());
 			}
 			catch(java.net.SocketException ne)
