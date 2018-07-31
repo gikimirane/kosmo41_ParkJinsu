@@ -495,29 +495,15 @@ public class MultiServer6 {
 				Connection con = ConnectionPool.getConnection();
 				PreparedStatement pstmt = null;
 				ResultSet rs = null;
-				
-	
-				
+
 				String sql = "select " + rn + " from room";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
 				while(rs.next())
 				{
-					lst.add(rs.getString(1));	
-				}
-				rs.close();
-				pstmt.close();
-				con.close();
-				if(lst.toString() == null)
-				{
-					return;
-				}
-				Iterator<String> it = lst.iterator();
-				while(it.hasNext())
-				{
 					try
 					{				
-						PrintWriter out3 = (PrintWriter)clientMap.get(it.next());	
+						PrintWriter out3 = (PrintWriter)clientMap.get(rs.getString(1));	
 						out3.println(URLEncoder.encode(msg, "UTF-8"));
 						
 					}
@@ -525,8 +511,30 @@ public class MultiServer6 {
 					{
 						e.printStackTrace();
 					}
-
+//					lst.add(rs.getString(1));	
 				}
+				rs.close();
+				pstmt.close();
+				con.close();
+//				if(lst.toString() == null)
+//				{
+//					return;
+//				}
+//				Iterator<String> it = lst.iterator();
+//				while(it.hasNext())
+//				{
+//					try
+//					{				
+//						PrintWriter out3 = (PrintWriter)clientMap.get(it.next());	
+//						out3.println(URLEncoder.encode(msg, "UTF-8"));
+//						
+//					}
+//					catch(Exception e)
+//					{
+//						e.printStackTrace();
+//					}
+//
+//				}
 				
 			}
 			catch(Exception e)
