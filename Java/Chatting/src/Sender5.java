@@ -41,18 +41,27 @@ public class Sender5 extends Thread {
 				try
 				{
 					String s2 = s.nextLine();
+					if(s2.equals("") || s2.length() == 0)
+					{
+						continue;
+					}
 					StringTokenizer str = new StringTokenizer(s2," ");
 					List<String> lst = new ArrayList<String>();
 					while(str.hasMoreTokens())
 					{
 						lst.add(str.nextToken());
 					}
-
-					if(lst.get(0).equals("/to") && lst.size() > 2)
+					if(s2.equals("q") || s2.equals("Q"))
+					{
+						out.println(URLEncoder.encode(s2, "UTF-8"));
+						break;
+					}
+					else if(lst.get(0).equals("/to") && lst.size() > 2)
 					{
 						out.println(URLEncoder.encode(s2, "UTF-8"));
 						
 					}
+					
 					else if(lst.get(0).equals("/to") &&lst.size() == 2 && ear == false)
 					{
 						ear = true;
@@ -67,23 +76,11 @@ public class Sender5 extends Thread {
 					
 					else if(ear == true)
 					{
-						if(s2.equals("q") || s2.equals("Q"))
-						{
-							//out.println(s2);
-							break;
-						}
-						else
-							out.println("/to"+" "+name2+" "+s2);
+						out.println(URLEncoder.encode("/to"+" "+name2+" "+s2, "UTF-8"));
 					}
 					else if(ear == false)
 					{
-						if(s2.equals("q") || s2.equals("Q"))
-						{
-							out.println(URLEncoder.encode(s2, "UTF-8"));
-							break;
-						}
-						else
-							out.println(URLEncoder.encode(s2, "UTF-8"));
+						out.println(URLEncoder.encode(s2, "UTF-8"));
 					}
 					
 
