@@ -26,8 +26,7 @@ public class MultiServer6 {
 	ServerSocket serverSocket = null;
 	Socket socket = null;
 	Map<String, PrintWriter> clientMap;
-	Map<String, String> rname = new HashMap<String, String>();
-	
+	Map<String, String> rname = new HashMap<String, String>();	
 	
 	//생성자
 	public MultiServer6()
@@ -81,6 +80,7 @@ public class MultiServer6 {
 
 		try
 		{
+			Set<String> noid = new HashSet<>();
 			Set<String> yok = new HashSet<>();
 			Set<String> idset = new HashSet<>();
 			Set<String> blockset = new HashSet<>();
@@ -90,8 +90,7 @@ public class MultiServer6 {
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
 			String sql = null;		
-			
-			
+						
 //-------------------------------------------------------------------------------------------			
 			sql = "select id from block where blocking = '"+ name +"'";
 			pstmt = con.prepareStatement(sql);
@@ -100,7 +99,7 @@ public class MultiServer6 {
 			{
 				blockset.add(rs.getString(1));
 			}
-			rs.close(); pstmt.close(); con.close();
+			rs.close(); pstmt.close(); 
 //---------------------------------------------------------------------------------------------			
 			Set<String> key = clientMap.keySet();
 			Iterator<String> it = key.iterator();
@@ -109,6 +108,7 @@ public class MultiServer6 {
 				String id = (String)it.next();
 				idset.add(id);
 			}
+			
 			it = idset.iterator();
 			while(it.hasNext())
 			{
@@ -118,6 +118,7 @@ public class MultiServer6 {
 					cha.add(str);
 				}
 			}
+			
 			Set<String> waitkey = rname.keySet();
 			it = cha.iterator();
 			while(it.hasNext())
@@ -127,27 +128,34 @@ public class MultiServer6 {
 				{
 					wait.add(str);
 				}
-			}
+			}	
 			
-			String ymsg = msg;
-			String name2 = "";
-			con = ConnectionPool.getConnection();
-			sql = "select personal from nomsg where id = '"+name+"'";
+			sql = "select id from nomsg";
 			pstmt = con.prepareStatement(sql);
 			rs = pstmt.executeQuery();
 			while(rs.next())
 			{
-				String no = ymsg.replace(rs.getString(1), "xxxxx");
-				ymsg = no;
-			}	
-			rs.close(); pstmt.close(); con.close();
+				String no = rs.getString(1);
+				yok.add(no);
+			}
 			
-			Iterator<String> it_2 = wait.iterator();			
-			while(it_2.hasNext())
+			it = wait.iterator();
+			while(it.hasNext())
 			{	
-				String str = it_2.next();
-				if(name.contains(str))
-				{		
+				String ymsg = msg;
+				String str = it.next();
+				if(yok.contains(str))
+				{
+					sql = "select personal from nomsg where id = '"+str+"'";
+					pstmt = con.prepareStatement(sql);
+					rs = pstmt.executeQuery();
+					while(rs.next())
+					{
+						String nomsg = rs.getString(1);
+						String noo = ymsg.replace(nomsg, "xxxxx");
+						ymsg = noo;
+						
+					}
 					PrintWriter it_out = (PrintWriter) clientMap.get(str);
 					it_out.println(URLEncoder.encode(ymsg, "UTF-8"));
 				}
@@ -158,7 +166,7 @@ public class MultiServer6 {
 				}
 				
 			}
-			System.out.println("aaaaa");
+			rs.close(); pstmt.close(); con.close();
 		}
 		catch(Exception e)
 		{
@@ -191,8 +199,7 @@ public class MultiServer6 {
 			if(n<10)
 				noThread = "0" + n;
 			else
-				noThread = "" + n;
-			
+				noThread = "" + n;			
 		}
 
 		//생성자
@@ -247,14 +254,15 @@ public class MultiServer6 {
 				sql = "insert into block values('"+name+"','"+st+"')";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
-				sql = "select count(*) from block where id = '"+name+"' and blocking = '" + st +"'";
+				
+				sql = "select count(*) from block where id = '" + name +"' and blocking = '" + st+"'";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
 				while(rs.next())
 				{
 					if(rs.getInt(1) == 2)
 					{
-						sql = "delete block where id = '" + name +"'";
+						sql = "delete block where id = '" + name +"' and blocking = '" + st + "'";
 						pstmt = con.prepareStatement(sql);
 						pstmt.executeUpdate();
 					}
@@ -272,6 +280,7 @@ public class MultiServer6 {
 		{
 			try
 			{
+				
 //				int num1 = str.indexOf(" ");
 //				String st = str.substring(num1+1);
 				if(st != null)
@@ -284,6 +293,7 @@ public class MultiServer6 {
 					pstmt.executeUpdate();
 					pstmt.close();
 					con.close();
+				
 				}
 				else
 				{
@@ -305,8 +315,7 @@ public class MultiServer6 {
 			{			
 				try
 				{	
-					int a = 0;
-					
+					int a = 0;					
 					name = blackList();
 					Connection con = ConnectionPool.getConnection();
 					PreparedStatement pstmt = null;
@@ -323,12 +332,10 @@ public class MultiServer6 {
 							out.println(URLEncoder.encode("중복입니다. 다시 입력하세요", "UTF-8"));	
 							}catch(UnsupportedEncodingException e) {}
 							a++;
-							break;
 						}
 					}
-					rs.close();
-					pstmt.close();
-					con.close();
+					rs.close(); pstmt.close(); con.close();
+					
 					if(a == 0)
 					{
 						con = ConnectionPool.getConnection();
@@ -345,51 +352,75 @@ public class MultiServer6 {
 					e.printStackTrace();
 				}	
 			}
+			
 			return name;
 		}
 		public String blackList() //블랙리스트 처리
 		{
 			String name = "";
-
+			int a = 0;
+			
 			try
 			{
-				Connection con = ConnectionPool.getConnection();
 				PreparedStatement pstmt = null;
 				ResultSet rs = null;
 				String sql = null;	
 				while(true)
-				{	
-//					int a = 0;
+				{					
+					boolean check = true;
 					name = in.readLine(); 
 					name = URLDecoder.decode(name, "UTF-8");
-					
-					sql = "select blacklist from member where blacklist = '"+name+"'";
+					Connection con = ConnectionPool.getConnection();
+					sql = "select count(blacklist) from member";
 					pstmt = con.prepareStatement(sql);
 					rs = pstmt.executeQuery();
 					if(rs.next() == true)
 					{
-						out.println(URLEncoder.encode(rs.getString(1)+ "는 블랙리스트입니다", "UTF-8"));
-						out.println(URLEncoder.encode("나가세요", "UTF-8"));
+						a = rs.getInt(1);
+					}
+					rs.close(); pstmt.close(); con.close();
+					if(a == 0)
+					{
+						break;
+					}
+					con = ConnectionPool.getConnection();
+					sql = "select blacklist from member where blacklist is not null";
+					pstmt = con.prepareStatement(sql);
+					rs = pstmt.executeQuery();
+					while(rs.next())
+					{
+						String bname = rs.getString(1);
+						if(name.equals(bname))
+						{
+							out.println(URLEncoder.encode(name+ "는 블랙리스트입니다", "UTF-8"));
+							out.println(URLEncoder.encode("나가세요", "UTF-8"));
+							check = false;
+						}					
+					}
+					rs.close();	pstmt.close(); con.close();	
+					if(check)
+					{
+						if(rs != null) rs.close();
+						if(pstmt != null) pstmt.close();
+						if(con != null) con.close();
+						break;
+					}
+					else
+					{
+						if(rs != null) rs.close();
+						if(pstmt != null) pstmt.close();
+						if(con != null) con.close();
 						continue;
-					}				
-					rs.close();
-					pstmt.close();
-					con.close();
-					break;
-//					if(a == 0)
-//					{
-//						break;
-//					}					
+					}
 				}
-//				rs.close();
-//				pstmt.close();
-//				con.close();
+				
 			}
 			catch(Exception e)
 			{
 				System.out.println("error");
 				e.printStackTrace();
 			}
+
 			return name;
 			
 		
@@ -413,9 +444,15 @@ public class MultiServer6 {
 				sql = "delete block where id = '"+name+"'";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
+				
 				sql = "delete nomsg where id = '" + name + "'";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
+				
+				sql = "delete member where ivin = '" + name +"'";
+				pstmt = con.prepareStatement(sql);
+				pstmt.executeUpdate();
+				
 				pstmt.close();				
 				con.close();
 				
@@ -437,7 +474,7 @@ public class MultiServer6 {
 				try
 				{
 					PrintWriter it_out = (PrintWriter) clientMap.get(it.next());
-					it_out.println(URLEncoder.encode(msg, "UTF-8"));
+					it_out.println(URLEncoder.encode("공지사항 : " +msg, "UTF-8"));
 				}
 				catch(Exception e)
 				{
@@ -556,6 +593,8 @@ public class MultiServer6 {
 		public void roomExit(String name) // 방 탈출
 		{
 			int i = 0;
+			Set<String> set = new HashSet<>();
+			ArrayList<String> lst = new ArrayList<>();
 			try
 			{
 				String rn = rname.get(name);
@@ -568,10 +607,15 @@ public class MultiServer6 {
 				String sql = "delete room where "+ rn + " = '" + name + "'";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
-				pstmt.close();
-				con.close();
+				pstmt.close(); con.close();
 				out.println(URLEncoder.encode("방에서 나왔습니다", "UTF-8"));
 				
+				con = ConnectionPool.getConnection();
+				sql = "delete room where id = '" + name + "'";
+				pstmt = con.prepareStatement(sql);
+				pstmt.executeUpdate();
+				pstmt.close(); con.close();
+					
 				con = ConnectionPool.getConnection();
 				sql = "select count("+rn+") from room";
 				pstmt = con.prepareStatement(sql);
@@ -580,9 +624,7 @@ public class MultiServer6 {
 				{
 					i = rs.getInt(1);
 				}
-				rs.close();
-				pstmt.close();
-				con.close();
+				rs.close(); pstmt.close(); con.close();
 				
 				if(i == 0)
 				{
@@ -597,14 +639,43 @@ public class MultiServer6 {
 					pstmt.executeUpdate();
 					pstmt.close();
 					con.close();
+					rname.remove(name);
 				}
 				else
 				{
+					String bjname = "";
+					con = ConnectionPool.getConnection();
+					sql = "select bj from room where roomlist = '" + rn + "'";
+					pstmt = con.prepareStatement(sql);
+					rs = pstmt.executeQuery();
+					if(rs.next() == true)
+					{
+						bjname = rs.getString(1);
+					}
+					rs.close(); pstmt.close(); con.close();
+					
+					if(bjname.equals(name))
+					{
+						con = ConnectionPool.getConnection();
+						sql = "select "+ rn +" from room where "+rn+" is not null";
+						pstmt = con.prepareStatement(sql);
+						rs = pstmt.executeQuery();
+						while(rs.next())
+						{
+							String rid = rs.getString(1);
+							lst.add(rid);
+						}
+						rs.close(); pstmt.close(); con.close();
+						
+						con = ConnectionPool.getConnection();
+						sql = "update room set bj = '"+lst.get(0) +"' where roomlist = '" + rn +"'";
+						pstmt = con.prepareStatement(sql);
+						pstmt.executeUpdate();
+						pstmt.close(); con.close();
+					}				
 					sendRMsg(name+"님이 방에서 나갔습니다.",name);
+					rname.remove(name);
 				}
-				
-				
-				
 			}
 			catch(Exception e)
 			{
@@ -683,34 +754,56 @@ public class MultiServer6 {
 		}
 		public void roomIn(String rn, String name) // 방 참여
 		{
+			int a = 0;
 			Set<String> set = new HashSet<>();
+			Set<String> id = new HashSet<>();
 			try
 			{
 				Connection con = ConnectionPool.getConnection();
 				PreparedStatement pstmt = null;
-				String sql = "select roomlist from room where roomlist is not noll";
+				String sql = "select count(roomlist) from room";
 				pstmt = con.prepareStatement(sql);
 				ResultSet rs = pstmt.executeQuery();
+				if(rs.next() == true)
+				{
+					a = rs.getInt(1);
+				}
+				rs.close(); pstmt.close(); con.close();
+				
+				if(a == 0)
+				{
+					out.println(URLEncoder.encode("방이 없습니다","UTF-8" ));
+					return;		
+				}
+				con = ConnectionPool.getConnection();
+				sql = "select roomlist from room where roomlist is not null";
+				pstmt = con.prepareStatement(sql);
+				rs = pstmt.executeQuery();
 				while(rs.next())
 				{
 					set.add(rs.getString(1));
 				}
+				rs.close(); pstmt.close(); con.close();
 				Iterator<String> it = set.iterator();
-//				while(it.hasNext())
-//				{
-//					String rid = it.next();
-//					if(!rid.equals(rn))
-//					{
-//						out.println(URLEncoder.encode("방이 없습니다","UTF-8" ));
-//						return;
-//					}
-//				}
+				while(it.hasNext())
+				{
+					String rid = it.next();
+					if(rn.contains(rid))
+					{
+						id.add(rid);				
+					}
+				}
+				if(id.size() == 0)
+				{
+					out.println(URLEncoder.encode("방이 없습니다","UTF-8" ));
+					return;
+				}
 				
 				
 				int num = 0; int num1 = 0; String str = "";	
 				con = ConnectionPool.getConnection();
 				pstmt = null;
-				sql = "select count from room where roomlist = '" + rn + "'";
+				sql = "select count from room where roomlist = '" + rn + "'"; // 제한인원
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
 				if(rs.next() == true)
@@ -732,6 +825,38 @@ public class MultiServer6 {
 				if(num1 > num-1)
 				{
 					out.println(URLEncoder.encode("방이 가득 찼습니다","UTF-8" ));
+					return;
+				}
+				Set<String> rbj = new HashSet<>();
+				Set<String> room = new HashSet<>();
+				con = ConnectionPool.getConnection();
+				sql = "select id from room where outid = '"+name+"'";
+				pstmt = con.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				while(rs.next())
+				{
+					String bj = rs.getString(1);
+					if(bj == null)
+					{
+						break;
+					}
+					else
+					{
+						rbj.add(bj);
+					}
+				}
+				rs.close(); pstmt.close(); con.close();
+				
+				Iterator<String> itt = rbj.iterator();
+				while(itt.hasNext())
+				{
+					String st = rname.get(itt.next());
+					room.add(st);			
+				}
+				if(room.contains(rn))
+				{
+					out.println(URLEncoder.encode("강퇴당한 방은 들어갈 수 없습니다.","UTF-8" ));
+					return;
 				}
 				else if(rname.get(name) != null)
 				{
@@ -885,7 +1010,7 @@ public class MultiServer6 {
 			try
 			{
 				out.println("---------------------------------------------------");
-				out.println(URLEncoder.encode("현재 대기실에 있는 인원은 ", "UTF-8"));
+				out.println(URLEncoder.encode("현재 대기실에 있는 인원 ", "UTF-8"));
 				while(it.hasNext())
 				{
 					String ep = it.next(); 
@@ -901,7 +1026,7 @@ public class MultiServer6 {
 				e.printStackTrace();
 			}
 		}
-		public void mrList(String name)
+		public void mrList(String name) //내방 인원 리스트
 		{
 			Set<String> set = new HashSet<>();
 			String rn = rname.get(name);
@@ -935,9 +1060,242 @@ public class MultiServer6 {
 			}
 		
 		}
-		
-		//쓰레드를 사용하기 위해서 run()메서드 재정의
+		public void out(String outname, String name) //강퇴
+		{
+			try
+			{
+				String bj = "";
+				String rn = rname.get(name);
+				if(rn == null)
+				{
+					out.println(URLEncoder.encode("방에서 해야 합니다", "UTF-8"));
+					return;
+				}
+				else
+				{
+					Connection con = ConnectionPool.getConnection();
+					PreparedStatement pstmt = null;
+					ResultSet rs = null;
+					
+					String sql = "select bj from room where roomlist = '" + rn +"'";
+					pstmt = con.prepareStatement(sql);
+					rs = pstmt.executeQuery();
+					if(rs.next() == true)
+					{
+						bj = rs.getString(1);
+					}
+					rs.close(); pstmt.close(); con.close();
+					
+					if(bj.equals(name))
+					{
+						String outrn = rname.get(outname);
+						if(outrn == null)
+						{
+							out.println(URLEncoder.encode("방에 없는 사람입니다", "UTF-8"));
+						}
+						else if(outrn.equals(rn))
+						{
+							roomExit(outname);
+							rname.remove(outname);
+							sendRMsg(outname + "님이 강퇴되셨습니다", name);
+							PrintWriter oname = (PrintWriter) clientMap.get(outname);
+							oname.println(URLEncoder.encode("강퇴 당하셨습니다", "UTF-8"));
+							
+							con = ConnectionPool.getConnection();
+							sql = "insert into room(id, outid) values('"+name+"', '"+outname+"')";
+							pstmt = con.prepareStatement(sql);
+							pstmt.executeUpdate();
+							pstmt.close(); con.close();
+						}
+					}
+					else
+					{
+						out.println(URLEncoder.encode("방장의 권한입니다", "UTF-8"));
+					}
+					
+				}
+				
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		public void rBomb(String name) //방 폭발
+		{
+			String rn = rname.get(name);
+			String bj = "";
+			try
+			{
+				Connection con = ConnectionPool.getConnection();
+				PreparedStatement pstmt = null;
+				ResultSet rs = null;
+				
+				String sql = "select bj from room where roomlist = '" + rn + "'";
+				pstmt = con.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				if(rs.next())
+				{
+					bj = rs.getString(1);
+				}
+				rs.close(); pstmt.close(); con.close();
+				
+				if(bj.equals(name))
+				{
+					Set<String> set = new HashSet<>();
+					con = ConnectionPool.getConnection();
+					sql = "select "+rn+" from room where "+rn+" is not null";
+					pstmt = con.prepareStatement(sql);
+					rs = pstmt.executeQuery();
+					while(rs.next())
+					{
+						String rid = rs.getString(1);
+						set.add(rid);
+					}
+					rs.close(); pstmt.close(); con.close();
+										
+					con = ConnectionPool.getConnection();
+					sql = "alter table room drop column "+rn;
+					pstmt = con.prepareStatement(sql);
+					pstmt.executeUpdate();
+					
+					sql = "delete room where roomlist = '"+rn+"'";
+					pstmt = con.prepareStatement(sql);
+					pstmt.executeUpdate();
+					pstmt.close(); con.close();
+					
+				
+					Iterator<String> it_2 = set.iterator();
+					while(it_2.hasNext())
+					{
+						String rid = it_2.next();
+						rname.remove(rid);
+						PrintWriter bomb = (PrintWriter)clientMap.get(rid);	
+						bomb.println(URLEncoder.encode("방이 폭발하였습니다", "UTF-8"));
+					}
+				}
+				else
+				{
+					out.println(URLEncoder.encode("방장이 아닙니다", "UTF-8"));
+				}
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}		
+		public void ivOut(String ivname, String name) //초대
+		{
+			Set<String> wname = new HashSet<>();
+			
+			try
+			{
+				String rn = rname.get(name);
 
+				if(rn == null)
+				{
+					out.println(URLEncoder.encode("방안에서 해야합니다", "UTF-8"));	
+					return;
+				}
+				
+				Connection con = ConnectionPool.getConnection();
+				PreparedStatement pstmt = null;
+				ResultSet rs = null;
+				String sql = "select count(ivin) from member where ivin = '" + ivname +"'";
+				pstmt = con.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				rs.next();
+				int i = rs.getInt(1);
+				
+				if(i > 0)
+				{
+					out.println(URLEncoder.encode("이미 초대받은 사람입니다.", "UTF-8"));	
+					rs.close(); pstmt.close(); con.close();
+					return;
+				}
+				
+				sql = "insert into member(ivout, ivin) values('" + name + "', '"+ ivname +"')";
+				pstmt = con.prepareStatement(sql);
+				pstmt.executeUpdate();
+				pstmt.close(); con.close();
+				
+				PrintWriter ivout = (PrintWriter)clientMap.get(ivname);	
+				ivout.println(URLEncoder.encode(name + "님이 당신을 초대하였습니다. 들어가시겠습니까? < Y / N >", "UTF-8"));	
+			}
+			catch(Exception e)
+			{
+				out.println("error : iv");
+				e.printStackTrace();
+			}
+		}
+		public void ivIn(String name) //초대수락
+		{
+			Set<String> set = new HashSet<>();
+			try
+			{
+				Connection con = ConnectionPool.getConnection();
+				PreparedStatement pstmt = null;
+				ResultSet rs = null;
+				
+				String sql = "select ivin from member where ivin = '" + name + "'";
+				pstmt = con.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				while(rs.next())
+				{
+					String ivin = rs.getString(1);
+					set.add(ivin);
+				}
+				rs.close(); pstmt.close(); 
+				if(set.contains(name))
+				{
+					sql = "select ivout from member where ivin = '" + name +"'";
+					pstmt = con.prepareStatement(sql);
+					rs = pstmt.executeQuery();
+					rs.next();
+					String ivout = rs.getString(1);
+					
+					String rn = rname.get(ivout);
+					roomIn(rn, name);
+					
+					sql = "delete member where ivin = '" + name +"'";
+					pstmt = con.prepareStatement(sql);
+					pstmt.executeUpdate();
+					rs.close(); pstmt.close(); con.close();
+				}
+				
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		public void ivNo(String name) //초대 거절
+		{
+			try
+			{
+				Connection con = ConnectionPool.getConnection();
+				PreparedStatement pstmt = null;
+				ResultSet rs = null;
+				
+				String sql = "select ivout from member where ivin = '"+ name +"'";
+				pstmt = con.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				rs.next();
+				String ivname = rs.getString(1);
+				PrintWriter it = (PrintWriter) clientMap.get(ivname);
+				it.println(URLEncoder.encode("초대를 거절하셨습니다", "UTF-8"));	
+				
+				sql = "delete member where ivin = '" + name + "'";
+				pstmt = con.prepareStatement(sql);
+				pstmt.executeUpdate();
+				
+				rs.close(); pstmt.close(); con.close();
+			}
+			catch(Exception e)
+			{
+				
+			}
+		}
 		@Override
 		public void run()
 		{			
@@ -951,32 +1309,30 @@ public class MultiServer6 {
 				PreparedStatement pstmt = null;
 				ResultSet rs = null;
 				String sql = null;		
+				
 				if(con != null) con.close();
 				//현재 객체가 가지고있는 소켓을 제외하고 다른 소켓(클라이언트)들에게 접속을 알림.
 				clientMap.put(name, out); // 해쉬맵에 키를 name으로 출력스트림 객체를 저장.
 				System.out.println("현재 접속자 수는 " + clientMap.size()+"명 입니다.");
 				//입력스트림이 null이 아니면 반복
 				String s = "";
-				
-//				Connection con = ConnectionPool.getConnection();
-				
+							
 				while(in != null)
 				{
 					s = in.readLine();
 					s = URLDecoder.decode(s, "UTF-8");
+					
 					String yok = "";
 					StringTokenizer str = new StringTokenizer(s," ");
 					String st1 = str.nextToken();
 					int num1 = s.indexOf(" ");
 					String st = s.substring(num1+1);
 					System.out.println(s);
+									
 					con = ConnectionPool.getConnection();
 					pstmt = null;
 					rs = null;
-					sql = null;	
-//					con = ConnectionPool.getConnection();
-					ConnectionPool.listCacheInfos();
-									
+					ConnectionPool.listCacheInfos();									
 					sql = "select server from nomsg where server is not null";
 					pstmt = con.prepareStatement(sql);
 					rs = pstmt.executeQuery();
@@ -986,33 +1342,33 @@ public class MultiServer6 {
 						s = yok;
 					}					
 					rs.close(); pstmt.close(); con.close();
+					
 						
-					if(s.equals("q") || s.equals("Q")) //종료
-					{
-						break;
-					}
-					else if(st1.equals("/list")) //리스트
-					{			
-						sendList();
-					}
+					if(s.equals("q") || s.equals("Q")) break; //종료 
+					else if(st1.equals("/list")) sendList(); //리스트					
 					else if(st1.equals("/to"))// 귓속말
 					{
 						num1 = st.indexOf(" ");
 						st = st.substring(num1);
 						sendToMsg(str.nextToken(),name,st);
 					}
-					else if(st1.equals("/bk")) block(st,name); else if(st1.equals("/ng")) noMsg(st,name); 
-					else if(st1.equals("/all")) every(st); else if(st1.equals("/room")) room(st, name); 
-					else if(st1.equals("/in")) roomIn(st, name); else if(st1.equals("/rlist")) rList();
-					else if(st1.equals("/wlist")) wList(); else if(st1.equals("/mrlist"))mrList(name);
-					
-					
-					else if(st1.equals("/exit"))
+					else if(st1.equals("/bk")) block(st,name);//블럭
+					else if(st1.equals("/ng")) //금칙어 
 					{
-						roomExit(name);
-						
-						rname.remove(name);
+						noMsg(st,name);
 					}
+					else if(st1.equals("/all")) every(st); //공지사항
+					else if(st1.equals("/room")) room(st, name); //방생성 
+					else if(st1.equals("/in")) roomIn(st, name);//방 참여
+					else if(st1.equals("/rlist")) rList(); //방 리스트
+					else if(st1.equals("/wlist")) wList();//대기실 리스트
+					else if(st1.equals("/mrlist"))mrList(name); //내방 인원 리스트
+					else if(st1.equals("/out")) out(st, name); //강퇴
+					else if(st1.equals("/exit")) roomExit(name); //방 나가기
+					else if(st1.equals("/rbomb")) rBomb(name); //방폭발
+					else if(st1.equals("/iv")) ivOut(st,name); //초대 하기
+					else if(st1.equals("y")) ivIn(name); //초대 받기
+					else if(st1.equals("n")) ivNo(name); //초대 거절
 					else
 					{
 						if(rname.get(name) != null)
@@ -1028,17 +1384,13 @@ public class MultiServer6 {
 					if(pstmt != null) pstmt.close();
 					if(con != null)con.close();
 				}
-				
-				
-//				exit(name);
 			}
 			catch(Exception e)
 			{
 				System.out.println("예외3:"+e);
 			}
 			finally
-			{
-				
+			{			
 				//예외가 발생할때 퇴장. 해쉬맵에서 해당 데이터 제거.
 				//보통 종료하거나 나가면 java.net.SocketException: 예외발생
 				try

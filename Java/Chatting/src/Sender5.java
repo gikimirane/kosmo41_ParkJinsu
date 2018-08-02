@@ -35,7 +35,7 @@ public class Sender5 extends Thread {
 		try
 		{
 			//서버에 입력한 사용자 이름을 보내준다
-			out.println(name);
+			out.println(URLEncoder.encode(name, "UTF-8"));
 			while(out!=null)
 			{
 				try
