@@ -20,7 +20,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-public class MultiServer6 {
+public class test00 {
 	ArrayList<String> lst = new ArrayList();
 	private String noThread = "00";
 	ServerSocket serverSocket = null;
@@ -30,8 +30,9 @@ public class MultiServer6 {
 	Connection con = null;
 	PreparedStatement pstmt = null;
 	ResultSet rs = null;
+	
 	//생성자
-	public MultiServer6()
+	public test00()
 	{
 		//클라이언트의 출력스트림을 저장할 해쉬맵 생성.
 		clientMap = new HashMap<String, PrintWriter>();
@@ -44,11 +45,11 @@ public class MultiServer6 {
 	{		
 		try
 		{	
-			con = ConnectionPool.getConnection();
+			
 			serverSocket = new ServerSocket(9999); //9999포트로 서버소켓 객체생성
 	
 			System.out.println("서버가 시작되었습니다.");
-		
+			con = ConnectionPool.getConnection();
 			while(true)
 			{
 				socket = serverSocket.accept();
@@ -68,9 +69,9 @@ public class MultiServer6 {
 		{
 			try
 			{
-				if(rs != null)rs.close();
-				if(pstmt != null)pstmt.close();
-				if(con != null)con.close();
+				if(rs != null) rs.close();
+				if(pstmt != null) pstmt.close();
+				if(con != null) con.close();
 				serverSocket.close();
 			}
 			catch(Exception e)
@@ -92,7 +93,9 @@ public class MultiServer6 {
 			Set<String> blockset = new HashSet<>();
 			Set<String> cha = new HashSet<>();
 			Set<String> wait = new HashSet<>();
-
+			Connection con = ConnectionPool.getConnection();
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
 			String sql = null;		
 						
 //-------------------------------------------------------------------------------------------			
@@ -170,7 +173,7 @@ public class MultiServer6 {
 				}
 				
 			}
-
+			rs.close(); pstmt.close(); con.close();
 		}
 		catch(Exception e)
 		{
@@ -181,7 +184,7 @@ public class MultiServer6 {
 
 	public static void main(String[] args) {
 		//서버객체 생성
-		MultiServer6 ms = new MultiServer6();
+		test00 ms = new test00();
 		ms.init();
 
 	}
@@ -285,12 +288,11 @@ public class MultiServer6 {
 //				String st = str.substring(num1+1);
 				if(st != null)
 				{
+
 					String sql = null;
 					sql = "insert into nomsg(personal,id) values('" + st +"','"+ name + "')";
 					pstmt = con.prepareStatement(sql);
 					pstmt.executeUpdate();
-					pstmt.close();
-
 				
 				}
 				else
@@ -315,7 +317,6 @@ public class MultiServer6 {
 				{	
 					int a = 0;					
 					name = blackList();
-
 					String sql = null;	
 					sql = "select id from member where id = '" + name +"'";
 					pstmt = con.prepareStatement(sql);
@@ -330,11 +331,9 @@ public class MultiServer6 {
 							a++;
 						}
 					}
-
 					
 					if(a == 0)
 					{
-
 						sql = "insert into member(id) values('"+name+"')";
 						pstmt = con.prepareStatement(sql);
 						pstmt.executeUpdate();
@@ -357,14 +356,12 @@ public class MultiServer6 {
 			
 			try
 			{
-
 				String sql = null;	
 				while(true)
 				{					
 					boolean check = true;
 					name = in.readLine(); 
 					name = URLDecoder.decode(name, "UTF-8");
-
 					sql = "select count(blacklist) from member";
 					pstmt = con.prepareStatement(sql);
 					rs = pstmt.executeQuery();
@@ -372,12 +369,10 @@ public class MultiServer6 {
 					{
 						a = rs.getInt(1);
 					}
-
 					if(a == 0)
 					{
 						break;
 					}
-
 					sql = "select blacklist from member where blacklist is not null";
 					pstmt = con.prepareStatement(sql);
 					rs = pstmt.executeQuery();
@@ -391,13 +386,18 @@ public class MultiServer6 {
 							check = false;
 						}					
 					}
-					rs.close();	pstmt.close(); 
 					if(check)
 					{
+						if(rs != null) rs.close();
+						if(pstmt != null) pstmt.close();
+						if(con != null) con.close();
 						break;
 					}
 					else
 					{
+						if(rs != null) rs.close();
+						if(pstmt != null) pstmt.close();
+						if(con != null) con.close();
 						continue;
 					}
 				}
@@ -417,12 +417,12 @@ public class MultiServer6 {
 		{
 			try
 			{
+				//ResultSet rs = null;
 				String sql = null;	
 				
 				sql = "delete member where id = '"+name+"'";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
-				pstmt.close();
 				
 				sql = "delete block where id = '"+name+"'";
 				pstmt = con.prepareStatement(sql);
@@ -434,8 +434,7 @@ public class MultiServer6 {
 				
 				sql = "delete member where ivin = '" + name +"'";
 				pstmt = con.prepareStatement(sql);
-				pstmt.executeUpdate();			
-				pstmt.close();				
+				pstmt.executeUpdate();
 				
 				roomExit(name);
 				
@@ -485,7 +484,6 @@ public class MultiServer6 {
 					{
 						a = rs.getInt(1);
 					}
-					rs.close(); pstmt.close(); 
 					if(a > 0)
 					{
 						out.println(URLEncoder.encode("같은 이름의 방은 만들수 없습니다","UTF-8" ));
@@ -511,17 +509,14 @@ public class MultiServer6 {
 						sql = "alter table room add ("+str+"     varchar2(20))";
 						pstmt = con.prepareStatement(sql);
 						pstmt.executeUpdate();
-						pstmt.close();
-						
+					
 						sql = "insert into room(roomlist, bj, count, ox, pw) values('" + str + "', '"+name+"', " + num1 +",'비공개방','"+s3+"')";
 						pstmt = con.prepareStatement(sql);
 						pstmt.executeUpdate();
-						pstmt.close();
 						
 						sql = "insert into room("+str+") values('" + name +"')";
 						pstmt = con.prepareStatement(sql);
 						pstmt.executeUpdate();
-						pstmt.close();
 					}
 					else
 					{
@@ -529,21 +524,18 @@ public class MultiServer6 {
 						rname.put(name, rn);
 						String str = rname.get(name);
 						out.println(URLEncoder.encode("방에 입장하셨습니다", "UTF-8"));
-
+						
 						sql = "alter table room add ("+str+"     varchar2(20))";
 						pstmt = con.prepareStatement(sql);
 						pstmt.executeUpdate();
-						pstmt.close();
 						
 						sql = "insert into room(roomlist, bj, count, ox) values('" + str + "', '"+name+"', " + num1 +",'공개방')";
 						pstmt = con.prepareStatement(sql);
 						pstmt.executeUpdate();
-						pstmt.close();
-						
+
 						sql = "insert into room("+str+") values('" + name +"')";
 						pstmt = con.prepareStatement(sql);
 						pstmt.executeUpdate();
-						pstmt.close();
 					}
 				}
 			}
@@ -563,17 +555,15 @@ public class MultiServer6 {
 				String rn = rname.get(name);
 				if(rn == null)
 					return;
-				
+
 				String sql = "delete room where "+ rn + " = '" + name + "'";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
-				pstmt.close(); 
 				out.println(URLEncoder.encode("방에서 나왔습니다", "UTF-8"));
 				
 				sql = "delete room where id = '" + name + "'";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
-				pstmt.close();
 					
 				sql = "select count("+rn+") from room";
 				pstmt = con.prepareStatement(sql);
@@ -582,19 +572,17 @@ public class MultiServer6 {
 				{
 					i = rs.getInt(1);
 				}
-				rs.close(); pstmt.close(); 
 				
 				if(i == 0)
 				{
 					sql = "alter table room drop column "+ rn;
 					pstmt = con.prepareStatement(sql);
 					pstmt.executeUpdate();
-					pstmt.close();
 					
 					sql = "delete room where roomlist = '" + rn +"'";
 					pstmt = con.prepareStatement(sql);
 					pstmt.executeUpdate();
-					pstmt.close();
+
 					rname.remove(name);
 				}
 				else
@@ -607,7 +595,6 @@ public class MultiServer6 {
 					{
 						bjname = rs.getString(1);
 					}
-					rs.close(); pstmt.close(); 
 					
 					if(bjname.equals(name))
 					{
@@ -619,12 +606,10 @@ public class MultiServer6 {
 							String rid = rs.getString(1);
 							lst.add(rid);
 						}
-						rs.close(); pstmt.close();
 						
 						sql = "update room set bj = '"+lst.get(0) +"' where roomlist = '" + rn +"'";
 						pstmt = con.prepareStatement(sql);
 						pstmt.executeUpdate();
-						pstmt.close(); 
 					}				
 					sendRMsg(name+"님이 방에서 나갔습니다.",name);
 					rname.remove(name);
@@ -645,6 +630,7 @@ public class MultiServer6 {
 			ArrayList<String> lst3 = new ArrayList<String>();	
 			try
 			{
+
 				String sql = "select " + rn + " from room where "+rn+" is not null";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -653,12 +639,12 @@ public class MultiServer6 {
 					String str = rs.getString(1);
 					lst.add(str);	
 				}
-				rs.close(); pstmt.close(); 
 				
 				if(lst.size() == 0)
 				{
 					return;
 				}
+				
 				sql = "select id from block where blocking = '" + name + "' and id is not null";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -666,7 +652,6 @@ public class MultiServer6 {
 				{
 					lst2.add(rs.getString(1));
 				}
-				rs.close(); pstmt.close();
 				
 				Iterator<String> it = lst.iterator();
 				while(it.hasNext())
@@ -676,7 +661,8 @@ public class MultiServer6 {
 					{
 						lst3.add(str);
 					}
-				}				
+				}
+				
 				sql = "select id from nomsg";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -713,7 +699,6 @@ public class MultiServer6 {
 					}
 
 				}
-				rs.close(); pstmt.close(); 
 				
 			}
 			catch(Exception e)
@@ -729,8 +714,6 @@ public class MultiServer6 {
 			Set<String> id = new HashSet<>();
 			try
 			{
-				Connection con = ConnectionPool.getConnection();
-				PreparedStatement pstmt = null;
 				String sql = "select count(roomlist) from room";
 				pstmt = con.prepareStatement(sql);
 				ResultSet rs = pstmt.executeQuery();
@@ -738,14 +721,12 @@ public class MultiServer6 {
 				{
 					a = rs.getInt(1);
 				}
-				rs.close(); pstmt.close(); con.close();
-				
+
 				if(a == 0)
 				{
 					out.println(URLEncoder.encode("방이 없습니다","UTF-8" ));
 					return;		
 				}
-				con = ConnectionPool.getConnection();
 				sql = "select roomlist from room where roomlist is not null";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -753,7 +734,6 @@ public class MultiServer6 {
 				{
 					set.add(rs.getString(1));
 				}
-				rs.close(); pstmt.close(); con.close();
 				Iterator<String> it = set.iterator();
 				while(it.hasNext())
 				{
@@ -771,8 +751,7 @@ public class MultiServer6 {
 				
 				
 				int num = 0; int num1 = 0; String str = "";	
-				con = ConnectionPool.getConnection();
-				pstmt = null;
+
 				sql = "select count from room where roomlist = '" + rn + "'"; // 제한인원
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -780,9 +759,7 @@ public class MultiServer6 {
 				{
 					num = rs.getInt(1);
 				}
-				rs.close(); pstmt.close(); con.close();
 				
-				con = ConnectionPool.getConnection();
 				sql = " select count(" + rn + ") from room";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -790,7 +767,6 @@ public class MultiServer6 {
 				{
 					num1 = rs.getInt(1);
 				}
-				rs.close(); pstmt.close(); con.close();
 				
 				if(num1 > num-1)
 				{
@@ -799,7 +775,6 @@ public class MultiServer6 {
 				}
 				Set<String> rbj = new HashSet<>();
 				Set<String> room = new HashSet<>();
-				con = ConnectionPool.getConnection();
 				sql = "select id from room where outid = '"+name+"'";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -815,7 +790,6 @@ public class MultiServer6 {
 						rbj.add(bj);
 					}
 				}
-				rs.close(); pstmt.close(); con.close();
 				
 				Iterator<String> itt = rbj.iterator();
 				while(itt.hasNext())
@@ -835,8 +809,6 @@ public class MultiServer6 {
 
 				else
 				{
-					con = ConnectionPool.getConnection();
-					pstmt = null;
 					sql = "select count(pw) from room where roomlist = '"+rn+"'";
 					pstmt = con.prepareStatement(sql);
 					rs = pstmt.executeQuery();
@@ -844,7 +816,6 @@ public class MultiServer6 {
 					{
 						num = rs.getInt(1);
 					}
-					rs.close(); pstmt.close(); con.close();
 					
 					while(true)
 					{
@@ -853,7 +824,6 @@ public class MultiServer6 {
 							
 							out.println(URLEncoder.encode("비밀번호를 입력하세요", "UTF-8"));
 							String s = in.readLine();
-							con = ConnectionPool.getConnection();
 							sql = "select pw from room where roomlist = '"+rn+"'";
 							pstmt = con.prepareStatement(sql);
 							rs = pstmt.executeQuery();
@@ -861,7 +831,6 @@ public class MultiServer6 {
 							{
 								str = rs.getString(1);
 							}
-							rs.close(); pstmt.close(); con.close();
 							if(str.equals(s))
 							{
 								out.println(URLEncoder.encode("방에 입장하셨습니다", "UTF-8"));								
@@ -869,8 +838,7 @@ public class MultiServer6 {
 								sql = "insert into room("+rn+") values('" + name +"')";
 								pstmt = con.prepareStatement(sql);
 								pstmt.executeUpdate();
-								pstmt.close();
-								con.close();
+
 								rname.put(name, rn);
 								sendRMsg(name+"님이 들어오셨습니다",name);
 								break;
@@ -884,12 +852,10 @@ public class MultiServer6 {
 						else if(num == 0)
 						{
 							out.println(URLEncoder.encode("방에 입장하셨습니다", "UTF-8"));							
-							con = ConnectionPool.getConnection();
 							sql = "insert into room("+rn+") values('" + name +"')";
 							pstmt = con.prepareStatement(sql);
 							pstmt.executeUpdate();
-							pstmt.close();
-							con.close();
+
 							rname.put(name, rn);
 							sendRMsg(name+"님이 들어오셨습니다",name);
 							break;
@@ -914,6 +880,7 @@ public class MultiServer6 {
 			ArrayList<String> lst4 = new ArrayList<String>();
 			try
 			{
+
 				String sql = "select roomlist, bj, count, ox from room where roomlist is not null";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();				
@@ -926,7 +893,6 @@ public class MultiServer6 {
 					lst4.add(rs.getString(4));
 //					out.println(URLEncoder.encode(rs.getString(1), "UTF-8"));
 				}
-				rs.close();	pstmt.close();
 				
 				if(lst.size() == 0)
 				{
@@ -954,7 +920,6 @@ public class MultiServer6 {
 						{
 							out.println(URLEncoder.encode(str + "    방장: "+str2+"     제한인원: "+rs.getInt(1)+"/" + num1+"       공개/비공개 : "+str3, "UTF-8"));
 						}
-						rs.close(); pstmt.close();
 					}
 					out.println("----------------------------------------------------------------------------------------");
 				}
@@ -995,6 +960,7 @@ public class MultiServer6 {
 			String rn = rname.get(name);
 			try
 			{
+
 				String sql = "select "+ rn + " from room where "+rn+" is not null";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -1003,7 +969,6 @@ public class MultiServer6 {
 					String rid = rs.getString(1);
 					set.add(rid);
 				}
-				rs.close(); pstmt.close();
 				
 				Iterator<String> it = set.iterator();
 				out.println("---------------------------------------------------");
@@ -1033,6 +998,7 @@ public class MultiServer6 {
 				}
 				else
 				{
+					
 					String sql = "select bj from room where roomlist = '" + rn +"'";
 					pstmt = con.prepareStatement(sql);
 					rs = pstmt.executeQuery();
@@ -1040,7 +1006,6 @@ public class MultiServer6 {
 					{
 						bj = rs.getString(1);
 					}
-					rs.close(); pstmt.close(); 
 					
 					if(bj.equals(name))
 					{
@@ -1060,14 +1025,15 @@ public class MultiServer6 {
 							sql = "insert into room(id, outid) values('"+name+"', '"+outname+"')";
 							pstmt = con.prepareStatement(sql);
 							pstmt.executeUpdate();
-							pstmt.close(); 
 						}
 					}
 					else
 					{
 						out.println(URLEncoder.encode("방장의 권한입니다", "UTF-8"));
-					}					
-				}				
+					}
+					
+				}
+				
 			}
 			catch(Exception e)
 			{
@@ -1080,10 +1046,7 @@ public class MultiServer6 {
 			String bj = "";
 			try
 			{
-				Connection con = ConnectionPool.getConnection();
-				PreparedStatement pstmt = null;
-				ResultSet rs = null;
-				
+
 				String sql = "select bj from room where roomlist = '" + rn + "'";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -1091,12 +1054,10 @@ public class MultiServer6 {
 				{
 					bj = rs.getString(1);
 				}
-				rs.close(); pstmt.close(); con.close();
 				
 				if(bj.equals(name))
 				{
 					Set<String> set = new HashSet<>();
-					con = ConnectionPool.getConnection();
 					sql = "select "+rn+" from room where "+rn+" is not null";
 					pstmt = con.prepareStatement(sql);
 					rs = pstmt.executeQuery();
@@ -1105,7 +1066,6 @@ public class MultiServer6 {
 						String rid = rs.getString(1);
 						set.add(rid);
 					}
-					rs.close(); pstmt.close(); con.close();
 										
 					con = ConnectionPool.getConnection();
 					sql = "alter table room drop column "+rn;
@@ -1115,9 +1075,7 @@ public class MultiServer6 {
 					sql = "delete room where roomlist = '"+rn+"'";
 					pstmt = con.prepareStatement(sql);
 					pstmt.executeUpdate();
-					pstmt.close(); con.close();
-					
-				
+							
 					Iterator<String> it_2 = set.iterator();
 					while(it_2.hasNext())
 					{
@@ -1150,6 +1108,8 @@ public class MultiServer6 {
 					out.println(URLEncoder.encode("방안에서 해야합니다", "UTF-8"));	
 					return;
 				}
+
+
 				String sql = "select count(ivin) from member where ivin = '" + ivname +"'";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -1166,7 +1126,6 @@ public class MultiServer6 {
 				sql = "insert into member(ivout, ivin) values('" + name + "', '"+ ivname +"')";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
-				pstmt.close();
 				
 				PrintWriter ivout = (PrintWriter)clientMap.get(ivname);	
 				ivout.println(URLEncoder.encode(name + "님이 당신을 초대하였습니다. 들어가시겠습니까? < Y / N >", "UTF-8"));	
@@ -1182,10 +1141,6 @@ public class MultiServer6 {
 			Set<String> set = new HashSet<>();
 			try
 			{
-				Connection con = ConnectionPool.getConnection();
-				PreparedStatement pstmt = null;
-				ResultSet rs = null;
-				
 				String sql = "select ivin from member where ivin = '" + name + "'";
 				pstmt = con.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -1194,7 +1149,6 @@ public class MultiServer6 {
 					String ivin = rs.getString(1);
 					set.add(ivin);
 				}
-				rs.close(); pstmt.close(); 
 				if(set.contains(name))
 				{
 					sql = "select ivout from member where ivin = '" + name +"'";
@@ -1209,7 +1163,6 @@ public class MultiServer6 {
 					sql = "delete member where ivin = '" + name +"'";
 					pstmt = con.prepareStatement(sql);
 					pstmt.executeUpdate();
-					rs.close(); pstmt.close(); con.close();
 				}
 				
 			}
@@ -1233,8 +1186,6 @@ public class MultiServer6 {
 				sql = "delete member where ivin = '" + name + "'";
 				pstmt = con.prepareStatement(sql);
 				pstmt.executeUpdate();
-				
-				rs.close(); pstmt.close(); 
 			}
 			catch(Exception e)
 			{
@@ -1250,10 +1201,8 @@ public class MultiServer6 {
 			{
 				name = existName(); //중복 아이디 체크, 블랙리스트 체크
 				sendAllMsg(name + "님이 입장하셨습니다.",name);
-
 				String sql = null;		
 				
-
 				//현재 객체가 가지고있는 소켓을 제외하고 다른 소켓(클라이언트)들에게 접속을 알림.
 				clientMap.put(name, out); // 해쉬맵에 키를 name으로 출력스트림 객체를 저장.
 				System.out.println("현재 접속자 수는 " + clientMap.size()+"명 입니다.");
@@ -1272,7 +1221,6 @@ public class MultiServer6 {
 					String st = s.substring(num1+1);
 					System.out.println(s);
 									
-
 					ConnectionPool.listCacheInfos();									
 					sql = "select server from nomsg where server is not null";
 					pstmt = con.prepareStatement(sql);
@@ -1282,9 +1230,7 @@ public class MultiServer6 {
 						yok = s.replace(rs.getString(1), "****");
 						s = yok;
 					}					
-					
-					
-						
+											
 					if(s.equals("q") || s.equals("Q")) break; //종료 
 					else if(st1.equals("/list")) sendList(); //리스트					
 					else if(st1.equals("/to"))// 귓속말
@@ -1321,7 +1267,9 @@ public class MultiServer6 {
 							sendAllMsg(name+" => "+s,name);
 						}
 					}
-
+					if(rs != null) rs.close();
+					if(pstmt != null) pstmt.close();
+					if(con != null)con.close();
 				}
 			}
 			catch(Exception e)
@@ -1339,6 +1287,7 @@ public class MultiServer6 {
 					
 					rname.remove(name);
 					
+//					Connection con = ConnectionPool.getConnection();
 					clientMap.remove(name);
 					sendAllMsg(name + "님이 퇴장하셨습니다.",name);
 					System.out.println("현재 접속자 수는 " + clientMap.size()+ "명입니다");
