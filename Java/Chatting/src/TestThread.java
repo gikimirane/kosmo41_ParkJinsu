@@ -22,6 +22,7 @@ public class TestThread extends Thread{
 			ResultSet rs = stmt.executeQuery("select count(*) from department");
 			while (rs.next())
 			{
+				//dfdkfjlj
 				System.out.println(rs.getInt(1) + " : " +noThread + " : " + con);
 			}
 			stmt.close();
