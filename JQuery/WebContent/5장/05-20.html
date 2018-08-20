@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+	<style>
+		div {
+			width:100px; height:100px;
+			background-color:Orange;
+			position:relative;
+		}
+	</style>
+	<script src = "http://code.jquery.com/jquery.js"> </script>
+	<script>
+		$(document).ready(function () {
+			//이벤트를 연결
+			$('button').click(function () {
+				//변수 선언
+				var html = $(this).html();
+				var evalText = "$('div')." + html;
+				//메서드를 실행
+				eval(evalText);
+			});
+			
+			//애니메이션을 시작
+				$('div').animate({
+					left: '500'			
+				}, 2000).animate({
+					left: '0'
+				}, 1000);
+		});
+	</script>
+</head>
+<body>
+	<button>stop()</button>
+	<button>stop(true)</button>
+	<button>stop(false, true)</button>
+	<button>stop(true, true)</button>
+	<div></div>
+</body>
+</html>
