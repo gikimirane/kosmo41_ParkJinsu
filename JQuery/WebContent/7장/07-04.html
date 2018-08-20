@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src = "http://code.jquery.com/jquery.js"> </script>
+</head>
+<body>
+	<script>
+		$(document).ready(function () {
+			$.ajax({
+				url:'/jquery/data.html', 
+				success: function(data) {
+					alert(data);
+					$('body').append(data);
+				}
+			});
+		});
+	</script>
+</body>
+</html>
