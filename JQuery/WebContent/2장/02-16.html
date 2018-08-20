@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+	<script src = "http://code.jquery.com/jquery.js"> </script>
+	<script>
+   		var xml = '';
+    	xml += '<friends>';
+    	xml += '    <friend>';
+    	xml += '        <name>연하진</name>';
+    	xml += '        <language>Ruby</language>';
+    	xml += '    </friend>';
+   		xml += '    <friend>';
+    	xml += '        <name>윤명월</name>';
+    	xml += '        <language>Basic</language>';
+    	xml += '    </friend>';
+    	xml += '    <friend>';
+    	xml += '        <name>윤하린</name>';
+    	xml += '        <language>C#</language>';
+    	xml += '    </friend>';
+    	xml += '</friends>';
+		$(document).ready(function () {
+			//변수를 선언합니다.
+			var xm1Doc = $.parseXML(xml);
+			$(xm1Doc).find('friend').each(function (index) {
+			});
+		});
+	</script>
+</head>
+<body>
+
+</body>
+</html>

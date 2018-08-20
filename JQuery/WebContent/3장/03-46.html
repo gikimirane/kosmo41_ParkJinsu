@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+	<script src = "http://code.jquery.com/jquery.js"> </script>
+	<script>
+		$(document).ready(function () {
+			//.image의 크기를 조정
+			$('img').css('width', 250);
+			
+			//함수를 2초마다 실행
+			setInterval(function() {
+				// 첫 번째 이미지를 마지막으로 보냅니다.
+				$('img').last().prependTo('body');
+			}, 1000);
+		});
+	</script>
+</head>
+<body>
+	<img src = "images/puppy.png" width = 200 />
+	<img src = "images/Koala.png" width = 200 />
+	<img src = "images/Lighthouse.png" width = 200 />
+	<img src = "images/Lighthouse.png" width = 200 />
+	<img src = "images/Jellyfish.png" width = 200 />
+</body>
+</html>
