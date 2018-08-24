@@ -33,11 +33,11 @@
 		request.onreadystatechange = function(event) {
 			if(request.readyState == 4) {
 				if(request.status == 200){
-					var json = eval('(' + request.responseText + ')');
+					var json = eval(request.responseText);
 				};
 			};
 		};
-		request.open('GET', '/jquery/data.json',true);
+		request.open('GET','/jquery/data.json',true);
 		request.send();
 	</script>
 </body>

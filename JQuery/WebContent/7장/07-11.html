@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src = "http://code.jquery.com/jquery.js"> </script>
+	<script>
+	$(document).ready(function () {
+		$.ajax({
+			url: '/jquery/data.xml',
+			success: function (data) {
+				$(data).find('product').each(function() {
+					//변수를 선언
+					var name = $(this).find('name').text()
+					var price = $(this).find('price').text()
+					alert(data);
+					//출력합니다.
+					$('<h1></h1>').text(name + ':' + price).appendTo('body')
+				});
+			}
+		});
+	});
+	</script>
+</head>
+<body>
+
+</body>
+</html>
