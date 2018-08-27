@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+	<title>Insert title here</title>
+	<script src = "http://code.jquery.com/jquery.js"> </script>
+	<script>
+		function form_check() {
+			submit_ajax();
+		}
+		
+		function submit_ajax(){		
+			var queryString3 = $("#testForm").serialize();
+			alert(queryString3);
+			
+			$.ajax({
+				url : '/jquery/data.html',
+				type : 'GET',
+				data : queryString3,
+				error: function(xhr, status, error){
+					alert(error);
+				},
+				success : function(data){
+					alert(data)
+				}
+			});
+		}
+	</script>
+</head>
+<body>
+	<form name="testForm" id = "testForm">
+		이름 <input type = "text" name = "name" id = "name" value = "박진수"/><br>
+		아이디 <input type = "text" name = "id" id = "id" value = "1234567" /><br><p>
+		
+		<input type = "button" value = "Ajax 폼 전송" onclick = "form_check()" />
+	</form>
+</body>
+</html>
