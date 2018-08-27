@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>JSP/sERVLET 07-ex</title>
+<script src = "http://code.jquery.com/jquery.js"></script>
+<script>
+	function calc(){
+		var num1 = $("#num1").val();
+		var num2 = $("#num2").val();
+		
+		var num3 = "num1 = " +num1 + ", num2 = " + num2;
+		$.ajax({
+			url : './data.html',
+			type : 'GET',
+			data : 
+			dataType : 'html',
+			success : function(data){
+				alert(data);
+			}
+		});
+	}
+</script>
+</head>
+<body>
+	<form id="testForm">
+		첫 번째 수<input type="text" id="num1" size="10"><br/>
+		두 번째 수<input type="text" id="num2" size="10"><br/>
+		계산<br/>
+		<input type="radio" name="cal" value="plus">더하기
+		<input type="radio" name="cal" value="minus">빼기
+		<input type="radio" name="cal" value="multi">곱하기
+		<input type="radio" name="cal" value="devide">나누기<br/>
+		
+		<input type="button" name="전송" onclick = "clac()">
+		
+	</form>
+</body>
+</html>
