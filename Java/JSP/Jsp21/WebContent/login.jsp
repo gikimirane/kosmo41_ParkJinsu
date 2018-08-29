@@ -8,11 +8,22 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>JSP/Servlet 21-1</title>
+<style>
+	form {
+		border:1px solid #cccccc;
+		text-align:center;
+		margin:300px
+	}
+	#id {
+		
+	}
+</style>
 </head>
 <body>
 	<form action="loginOk.jsp" method="post">
-		아이디 : <input type="text" name="id"> <br>
-		비밀번호 : <input type="password" name="pw"><br><p>
+		<p id="pid"><a href="form.jsp">홈으로</a></p>		
+		<input type="text" name="id" placeholder="아이디" maxlength="30" style="width:300px; height:30px; font-size:20px;"><br>
+		<input type="password" name="pw" placeholder="비밀번호" style="width:300px; height:30px; font-size:20px;"><br><p>
 		<input type="submit" value="로그인"> &nbsp;&nbsp;
 		<input type="button" value="회원가입" onclick="javascript:window.location='join.jsp'">
  	</form>

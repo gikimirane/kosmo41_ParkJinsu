@@ -6,8 +6,8 @@
 <jsp:useBean id="dto" class="com.study.jsp.MemberDTO"/>
 <jsp:setProperty name="dto" property="*"/>
 <%
-		dto.setrDate(new Timestamp(System.currentTimeMillis()));
-		MemberDAO dao = MemberDAO.getInstance();
+	dto.setrDate(new Timestamp(System.currentTimeMillis()));
+	MemberDAO dao = MemberDAO.getInstance();
 		if(dao.confirmId(dto.getId()) == MemberDAO.MEMBER_EXISTENT){
 %>
 		<script language="javascript">
@@ -15,10 +15,10 @@
 			history.back();
 		</script>
 <%
-		} else {
-			int ri = dao.insertMember(dto);
-			if(ri == MemberDAO.MEMBER_JOIN_SUCCESS) {
-				session.setAttribute("id", dto.getId());		
+	} else {
+	int ri = dao.insertMember(dto);
+	if(ri == MemberDAO.MEMBER_JOIN_SUCCESS) {
+		session.setAttribute("id", dto.getId());
 %>
 		<script language="javascript">
 			alert("회원가입을 축하 합니다.");

@@ -40,6 +40,7 @@
 	#wrap {
 		width:780;
 		overflow: hidden;
+		
 	}
 		
 	#content {
@@ -48,12 +49,15 @@
 	}
 		
 	#login {
-		width:120px; height:150px;
+		width:120px; height:100px;
 		float:left;
+		text-align:center;
+		
+		
 	}
 		
 	#banner {
-		width:120px; height:150px;
+		width:120px; height:200px;
 		float:left;
 		text-align:center;
 	}
@@ -84,9 +88,14 @@
 		<div id="wrap">
 			<div id="content">CONTENT</div>
 			<div id="login" >
+				<%if(session.getAttribute("id") == null) { %>
+				<a href="login.jsp">로그인</a><br>
+				<a href="join.jsp">회원가입</a>
+				<%} else { %>
+				<%=session.getAttribute("name") %>님<br> 어서오세요!<br>
+				<a href="logout.jsp">로그아웃</a>
+				<%} %>
 				
-				<a href="login.jsp">로그인하세요</a><br>
-				<a href="join.jsp">가입하세요</a>
 			</div>
 			<div id="banner">BANNER</div>
 		</div>
