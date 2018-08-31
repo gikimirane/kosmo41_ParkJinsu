@@ -20,7 +20,7 @@
 </head>
 <body>
 	<form name="login_form" action="client.jsp" method="post">
-		<p id="pid"><a href="form.jsp">홈으로</a></p>		
+			
 		<input type="text" name="id" value="<%if(session.getAttribute("id") != null)
 													out.println(session.getAttribute("id"));%>"><br>
 		<input type="password" name="pw"><br><p>
