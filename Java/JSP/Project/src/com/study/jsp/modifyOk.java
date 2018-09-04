@@ -26,6 +26,7 @@ public class modifyOk implements Service {
 		
 		request.setCharacterEncoding("UTF-8");
 		
+	
 		BDto dto = new BDto();
 		String id = (String)request.getParameter("id"); 
 		dto.setId(id);
@@ -45,13 +46,48 @@ public class modifyOk implements Service {
 		int ri = dao.updateMember(dto);
 		
 		if(ri == 1) {
-			writer.println("<html><head></head><body>");
-			writer.println("<script language=\"javascript\">\r\n" + 
-					"alert(\"정보가 수정되었습니다.\");\r\n" + 
-					"document.location.href=\"first.jsp\";\r\n" + 
-					"</script>");
-			writer.println("</body></html>");
-			writer.close();
+
+			if(session.getAttribute("bUrl").equals("notice.do"))
+			{
+				writer.println("<html><head></head><body>");
+				writer.println("<script language=\"javascript\">\r\n" + 
+						"alert(\"정보가 수정되었습니다.\");\r\n" + 
+						"document.location.href=\"notice.do\";\r\n" + 
+						"</script>");
+				writer.println("</body></html>");
+				writer.close();
+			}
+			else if(session.getAttribute("bUrl").equals("list.do"))
+			{
+				writer.println("<html><head></head><body>");
+				writer.println("<script language=\"javascript\">\r\n" + 
+						"alert(\"정보가 수정되었습니다.\");\r\n" + 
+						"document.location.href=\"list.do\";\r\n" + 
+						"</script>");
+				writer.println("</body></html>");
+				writer.close();
+			}
+			else if(session.getAttribute("bUrl").equals("picture.do"))
+			{
+				writer.println("<html><head></head><body>");
+				writer.println("<script language=\"javascript\">\r\n" + 
+						"alert(\"정보가 수정되었습니다.\");\r\n" + 
+						"document.location.href=\"picture.do\";\r\n" + 
+						"</script>");
+				writer.println("</body></html>");
+				writer.close();
+			}
+			else
+			{
+				writer.println("<html><head></head><body>");
+				writer.println("<script language=\"javascript\">\r\n" + 
+						"alert(\"정보가 수정되었습니다.\");\r\n" + 
+						"document.location.href=\"first.do\";\r\n" + 
+						"</script>");
+				writer.println("</body></html>");
+				writer.close();
+			}
+			
 		}
 		else 
 		{

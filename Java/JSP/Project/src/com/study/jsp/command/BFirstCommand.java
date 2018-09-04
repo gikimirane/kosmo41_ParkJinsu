@@ -22,6 +22,9 @@ public class BFirstCommand implements BCommand {
 		BDao dao = BDao.getInstance();
 		ArrayList<BDto> dtos = dao.first();   
 		request.setAttribute("best", dtos);
+		dtos = new ArrayList<BDto>();
+		dtos = dao.noticeCheck();
+		request.setAttribute("notice", dtos);
 	}
 
 }

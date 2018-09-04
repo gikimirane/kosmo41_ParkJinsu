@@ -57,12 +57,12 @@ public class BSearchCommand implements BCommand {
 		}
 		if(request.getParameter("bSearch").equals("bTitle"))
 		{		
-			ArrayList<BDto> dtos = dao.tSearch(search, nPage);
+			ArrayList<BDto> dtos = dao.tSearch(search, nPage,request);
 			request.setAttribute("list", dtos);
 		}
 		else
 		{
-			ArrayList<BDto> dtos = dao.iSearch(search, nPage);
+			ArrayList<BDto> dtos = dao.iSearch(search, nPage,request);
 			request.setAttribute("list", dtos);
 		}
 		  

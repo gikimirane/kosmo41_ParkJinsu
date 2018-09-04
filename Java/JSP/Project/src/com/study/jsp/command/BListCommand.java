@@ -24,7 +24,7 @@ public class BListCommand implements BCommand {
 			
 		}
 		BDao dao = BDao.getInstance();
-		BPageInfo pinfo = dao.articlePage(nPage, check);
+		BPageInfo pinfo = dao.articlePage(nPage, check,request);
 		request.setAttribute("page", pinfo); 
 		
 		nPage = pinfo.getCurPage();
@@ -34,7 +34,7 @@ public class BListCommand implements BCommand {
 		session.setAttribute("cpage", nPage);
 		  
 		
-		ArrayList<BDto> dtos = dao.list(nPage); //검색어 추가
+		ArrayList<BDto> dtos = dao.list(nPage, request); //검색어 추가
 		request.setAttribute("list", dtos); 
 		
 		 

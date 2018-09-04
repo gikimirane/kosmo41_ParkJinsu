@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%session.setAttribute("bUrl", "first.do"); %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -71,7 +72,7 @@
         <nav class="nav d-flex justify-content-between">
           	<a class="p-2 text-muted" href="notice.do">공지사항</a>
           	<a class="p-2 text-muted" href="chatt.do">대화방</a>
-          	<a class="p-2 text-muted" href="list.do">글 게시판</a>
+          	<a class="p-2 text-muted" href="list.do">자유 게시판</a>
           	<a class="p-2 text-muted" href="picture.do">사진 게시판</a>
           	<a class="p-2 text-muted" href="modify.jsp">내 정보</a>         
         </nav>

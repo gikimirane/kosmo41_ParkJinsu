@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
+<%session.setAttribute("bUrl", "list.do"); %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -73,7 +74,7 @@
           		
           	</div>
        		<div class="col-4 text-center">
-            	<a class="blog-header-logo text-dark" href="first.jsp">글 게시판</a>
+            	<a class="blog-header-logo text-dark" href="first.jsp">자유 게시판</a>
         	</div>
         	<div class="col-4 d-flex justify-content-end align-items-center">
         	</div>
@@ -82,7 +83,7 @@
        		<nav class="nav d-flex justify-content-between">
           		<a class="p-2 text-muted" href="notice.do">공지사항</a>
           		<a class="p-2 text-muted" href="chatt.do">대화방</a>
-          		<a class="p-2 text-muted" href="list.do">글 게시판</a>
+          		<a class="p-2 text-muted" href="list.do">자유 게시판</a>
           		<a class="p-2 text-muted" href="picture.do">사진 게시판</a>
           		<a class="p-2 text-muted" href="modify.jsp">내 정보</a>        
         	</nav>
@@ -171,6 +172,11 @@
   	</tbody>
 	</table>
 </div>
+start = ${page.startPage}
+end = ${page.endPage}
+total = ${page.totalPage}
+curpage = ${page.curPage}
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 </body>

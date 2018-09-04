@@ -19,7 +19,7 @@ public class BReplyCommand implements BCommand {
 		String bIndent = request.getParameter("bIndent");
 		  
 		BDao dao = BDao.getInstance();
-		dao.reply(bId, bName, bTitle, bContent, bGroup, bStep, bIndent); 
+		dao.reply(bId, bName, bTitle, bContent, bGroup, bStep, bIndent, request); 
 	}
 
 }

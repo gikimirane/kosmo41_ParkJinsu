@@ -69,13 +69,57 @@ public class loginOk implements Service {
 				session.setAttribute("id", id);
 				session.setAttribute("name", name);
 				session.setAttribute("ValidMem", "yes");
-				writer.println("<html><head><body>");
-				writer.println("<script language=\"javascript\">\r\n" + 
-						"		alert(\"정상적으로 로그인 되었습니다.\");\r\n" + 
-						"		document.location.href=\"first.do\";\r\n" + 
-						"	</script>");
-				writer.println("</body></html>");
-				writer.close();
+				if(session.getAttribute("bUrl").equals("first.do"))
+				{
+					writer.println("<html><head><body>");
+					writer.println("<script language=\"javascript\">\r\n" + 
+							"		alert(\"정상적으로 로그인 되었습니다.\");\r\n" + 
+							"		document.location.href=\"first.do\";\r\n" + 
+							"	</script>");
+					writer.println("</body></html>");
+					writer.close();
+				}
+				else if(session.getAttribute("bUrl").equals("list.do"))
+				{
+					writer.println("<html><head><body>");
+					writer.println("<script language=\"javascript\">\r\n" + 
+							"		alert(\"정상적으로 로그인 되었습니다.\");\r\n" + 
+							"		document.location.href=\"list.do\";\r\n" + 
+							"	</script>");
+					writer.println("</body></html>");
+					writer.close();
+				}
+				else if(session.getAttribute("bUrl").equals("notice.do"))
+				{
+					writer.println("<html><head><body>");
+					writer.println("<script language=\"javascript\">\r\n" + 
+							"		alert(\"정상적으로 로그인 되었습니다.\");\r\n" + 
+							"		document.location.href=\"notice.do\";\r\n" + 
+							"	</script>");
+					writer.println("</body></html>");
+					writer.close();
+				}
+				else if(session.getAttribute("bUrl").equals("picture.do"))
+				{
+					writer.println("<html><head><body>");
+					writer.println("<script language=\"javascript\">\r\n" + 
+							"		alert(\"정상적으로 로그인 되었습니다.\");\r\n" + 
+							"		document.location.href=\"picture.do\";\r\n" + 
+							"	</script>");
+					writer.println("</body></html>");
+					writer.close();
+				}
+				else if(session.getAttribute("bUrl").equals("modify.do"))
+				{
+					writer.println("<html><head><body>");
+					writer.println("<script language=\"javascript\">\r\n" + 
+							"		alert(\"정상적으로 로그인 되었습니다.\");\r\n" + 
+							"		document.location.href=\"modify.do\";\r\n" + 
+							"	</script>");
+					writer.println("</body></html>");
+					writer.close();
+				}
+				
 			}
 		}
 			

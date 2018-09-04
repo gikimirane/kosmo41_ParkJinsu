@@ -24,7 +24,7 @@ public class BNoticeCommand implements BCommand {
 			
 		}
 		BDao dao = BDao.getInstance();
-		BPageInfo pinfo = dao.articlePage(nPage, check);
+		BPageInfo pinfo = dao.articlePage(nPage, check,request);
 		request.setAttribute("page", pinfo); 
 		
 		nPage = pinfo.getCurPage();
@@ -35,7 +35,7 @@ public class BNoticeCommand implements BCommand {
 		  
 		
 		ArrayList<BDto> dtos = dao.noticeList(nPage); //검색어 추가
-		request.setAttribute("notice", dtos); 
+		request.setAttribute("list", dtos); 
 	}
 
 }

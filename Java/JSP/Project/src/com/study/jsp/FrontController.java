@@ -51,7 +51,7 @@ public class FrontController extends HttpServlet {
 			throws ServletException, IOException 
 	{
 		response.setContentType("text/html; charset=UTF-8");
-		PrintWriter out = response.getWriter();
+		PrintWriter writer = response.getWriter();
 		
 		BDto dto = null;
 		
@@ -69,6 +69,8 @@ public class FrontController extends HttpServlet {
 		HttpSession session = null;
 		session = request.getSession();
 		int curPage = 1;
+		
+		String bUrl = (String)session.getAttribute("bUrl");  
 		if(session.getAttribute("cpage") != null)
 		{
 			curPage = (int)session.getAttribute("cpage");
@@ -76,18 +78,43 @@ public class FrontController extends HttpServlet {
 			
 		if(com.equals("/write_view.do"))
 		{
-			viewPage = "write_view.jsp";
+			if(bUrl.equals("notice.do"))
+			{
+				if(session.getAttribute("id").equals("master"))
+				{
+					viewPage = "notice_write.jsp";
+				}
+				else
+				{
+					writer.println("<html><head><body>");
+					writer.println("<script language=\"javascript\">\r\n" + 
+							"alert(\"운영자만 접근할 수 있습니다.\");\r\n" + 
+							"history.go(-1);\r\n" + 
+							"</script>");
+					writer.println("</body></html>");
+					writer.close();
+				}
+			}
+			else if(bUrl.equals("list.do"))
+			{
+				viewPage = "write_view.jsp";
+			}
+			
 		}
 		else if(com.equals("/write.do"))
 		{
 			command = new BWriteCommand();
 			command.execute(request, response);
-			viewPage = "list.do";
+			if(session.getAttribute("bUrl").equals("list.do"))
+				viewPage = "list.do";
+			else if(session.getAttribute("bUrl").equals("notice.do"))
+				viewPage = "notice.do";	
 		}
 		else if(com.equals("/list.do"))
-		{       
+		{   
+			session.setAttribute("bUrl", "list.do");
 			command = new BListCommand();
-			command.execute(request, response);
+			command.execute(request, response);			
 			viewPage = "list.jsp";
 		}
 		else if(com.equals("/content_view.do"))
@@ -115,7 +142,11 @@ public class FrontController extends HttpServlet {
 		{        
 			command = new BDeleteCommand();
 			command.execute(request, response);
-			viewPage = "list.do?page="+curPage; 
+			if(session.getAttribute("bUrl").equals("list.do"))
+				viewPage = "list.do?page="+curPage; 
+			else if(session.getAttribute("bUrl").equals("notice.do"))
+				viewPage = "notice.do?page="+curPage;	
+			
 		}
 		else if(com.equals("/reply_view.do"))
 		{        
@@ -127,7 +158,10 @@ public class FrontController extends HttpServlet {
 		{         
 			command = new BReplyCommand();
 			command.execute(request, response);
-			viewPage = "list.do?page="+curPage; 
+			if(session.getAttribute("bUrl").equals("list.do"))
+				viewPage = "list.do?page="+curPage; 
+			else if(session.getAttribute("bUrl").equals("notice.do"))
+				viewPage = "notice.do?page="+curPage;	
 		}
 		else if(com.equals("/joinOk.do"))
 		{
@@ -159,7 +193,10 @@ public class FrontController extends HttpServlet {
 		{
 			command = new BSearchCommand(); 
 			command.execute(request, response);
-			viewPage="list.jsp";
+			if(session.getAttribute("bUrl").equals("list.do"))
+				viewPage = "list.jsp";
+			else if(session.getAttribute("bUrl").equals("notice.do"))
+				viewPage = "notice.jsp";	
 		}
 		else if(com.equals("/notice.do"))
 		{

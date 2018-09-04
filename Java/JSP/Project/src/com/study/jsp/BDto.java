@@ -13,7 +13,10 @@ public class BDto {
 	int bGroup;
 	int bStep;
 	int bIndent;
+	String bCheck;
 	
+	
+
 	private String id;
 	private String pw;
 	private String name;
@@ -29,7 +32,7 @@ public class BDto {
 	
 	public BDto(int bId, String bName, String bTitle, String bContent, 
 			Timestamp bDate, int bHit, int bGroup, int bStep, 
-			int bIndent)
+			int bIndent,String bCheck)
 	{
 		this.bId = bId;
 		this.bName = bName;
@@ -43,6 +46,13 @@ public class BDto {
 	}
 	
 	
+	public String getBCheck() {
+		return bCheck;
+	}
+
+	public void setBcheck(String bCheck) {
+		this.bCheck = bCheck;
+	}
 	public int getbId() {
 		return bId;
 	}

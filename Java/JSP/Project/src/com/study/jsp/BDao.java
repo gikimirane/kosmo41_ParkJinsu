@@ -11,6 +11,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 public class BDao {
@@ -27,6 +28,7 @@ public class BDao {
 	
 	int listCount = 15;	// 한페이지 당 보여줄 게시물의 갯수
 	int pageCount = 10;	// 하단에 보여줄 페이지 리스트의 갯수
+	
 	
 	private BDao() {
 		try
@@ -269,23 +271,44 @@ public class BDao {
 	
 	
 	
-	public void write(String bName, String bTitle, String bContent) 
+	public void write(String bName, String bTitle, String bContent,HttpServletRequest request) 
 	{
 		
 		Connection con = null;
 		PreparedStatement pstmt = null;
-		String query = "insert into mvc_board " + 
-					   " (bId, bName, bTitle, bContent, bHit, bGroup, bStep, bIndent) " +
-					   " values " +
-					   " (mvc_board_seq.nextval, ?, ?, ?, 0, mvc_board_seq.currval, 0, 0 )";
-		
+		HttpSession session = request.getSession();
+		String bUrl = (String)session.getAttribute("bUrl");
 		try {
-			con = dataSource.getConnection();
-			pstmt = con.prepareStatement(query);
-			pstmt.setString(1, bName);
-			pstmt.setString(2, bTitle);
-			pstmt.setString(3, bContent);
-			int rn = pstmt.executeUpdate();
+			
+			if(bUrl.equals("list.do"))
+			{
+				String query = "insert into mvc_board " + 
+						   " (bId, bName, bTitle, bContent, bHit, bGroup, bStep, bIndent, bcheck) " +
+						   " values " +
+						   " (mvc_board_seq.nextval, ?, ?, ?, 0, mvc_board_seq.currval, 0, 0, 'list')";
+				
+				con = dataSource.getConnection();
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, bName);
+				pstmt.setString(2, bTitle);
+				pstmt.setString(3, bContent);
+				int rn = pstmt.executeUpdate();
+			}
+			else if(bUrl.equals("notice.do"))
+			{
+				String query = "insert into mvc_board " + 
+						   " (bId, bName, bTitle, bContent, bHit, bGroup, bStep, bIndent, bcheck) " +
+						   " values " +
+						   " (mvc_board_seq.nextval, ?, ?, ?, 0, mvc_board_seq.currval, 0, 0, 'notice' )";
+				
+				con = dataSource.getConnection();
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, bName);
+				pstmt.setString(2, bTitle);
+				pstmt.setString(3, bContent);
+				int rn = pstmt.executeUpdate();
+			}
+			
 		}
 		catch(Exception e)
 		{
@@ -306,46 +329,84 @@ public class BDao {
 	
 	
 	
-	public ArrayList<BDto> list(int curPage)
+	public ArrayList<BDto> list(int curPage,HttpServletRequest request)
 	{
 		 
 		ArrayList<BDto> dtos = new ArrayList<BDto>();
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		HttpSession session = request.getSession();
+		String bUrl = (String)session.getAttribute("bUrl");
 		
 		int nStart = (curPage - 1) * listCount + 1;
 		int nEnd = (curPage - 1) * listCount + listCount;
 		
 		try 
 		{
-			con = dataSource.getConnection();
-			String query = "select * " +
-						   "  from (select rownum num, A.*" +
-						   "  from (select * from mvc_board " + //검색어 추가
-						   "  order by bgroup desc, bstep asc) A " + 
-						   "  where rownum <= ?) B " +
-						   " where B.num >= ?";
-			pstmt = con.prepareStatement(query);
-			pstmt.setInt(1, nEnd);
-			pstmt.setInt(2, nStart);		
-			rs = pstmt.executeQuery();
-				
-			while(rs.next()) {
-				int bId = rs.getInt("bId");
-				String bName = rs.getString("bName");
-				String bTitle = rs.getString("bTitle");
-				String bContent = rs.getString("bContent");
-				Timestamp bDate = rs.getTimestamp("bDate");
-				int bHit = rs.getInt("bHit");
-				int bGroup = rs.getInt("bGroup");
-				int bStep = rs.getInt("bStep");
-				int bIndent = rs.getInt("bIndent");
+			if(bUrl.equals("list.do"))
+			{
+				con = dataSource.getConnection();
+				String query = "select * " +
+							   "  from (select rownum num, A.*" +
+							   "  from (select * from mvc_board where bcheck = 'list'" + //검색어 추가
+							   "  order by bgroup desc, bstep asc) A " + 
+							   "  where rownum <= ?) B " +
+							   " where B.num >= ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setInt(1, nEnd);
+				pstmt.setInt(2, nStart);		
+				rs = pstmt.executeQuery();
 					
-				BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
-									bHit, bGroup, bStep, bIndent);
-				dtos.add(dto);
+				while(rs.next()) {
+					int bId = rs.getInt("bId");
+					String bName = rs.getString("bName");
+					String bTitle = rs.getString("bTitle");
+					String bContent = rs.getString("bContent");
+					Timestamp bDate = rs.getTimestamp("bDate");
+					int bHit = rs.getInt("bHit");
+					int bGroup = rs.getInt("bGroup");
+					int bStep = rs.getInt("bStep");
+					int bIndent = rs.getInt("bIndent");
+					String bCheck = rs.getString("bCheck");
+					
+					BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
+										bHit, bGroup, bStep, bIndent, bCheck);
+					dtos.add(dto);
+				}
 			}
+			else if(bUrl.equals("picture.do"))
+			{
+				con = dataSource.getConnection();
+				String query = "select * " +
+							   "  from (select rownum num, A.*" +
+							   "  from (select * from mvc_board where bcheck = 'picture'" + //검색어 추가
+							   "  order by bgroup desc, bstep asc) A " + 
+							   "  where rownum <= ?) B " +
+							   " where B.num >= ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setInt(1, nEnd);
+				pstmt.setInt(2, nStart);		
+				rs = pstmt.executeQuery();
+					
+				while(rs.next()) {
+					int bId = rs.getInt("bId");
+					String bName = rs.getString("bName");
+					String bTitle = rs.getString("bTitle");
+					String bContent = rs.getString("bContent");
+					Timestamp bDate = rs.getTimestamp("bDate");
+					int bHit = rs.getInt("bHit");
+					int bGroup = rs.getInt("bGroup");
+					int bStep = rs.getInt("bStep");
+					int bIndent = rs.getInt("bIndent");
+					String bCheck = rs.getString("bCheck");
+
+					BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
+										bHit, bGroup, bStep, bIndent, bCheck);
+					dtos.add(dto);
+				}
+			}
+			
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -365,38 +426,51 @@ public class BDao {
 		return dtos;
 	}
 	
-	public BPageInfo articlePage(int curPage, boolean check)
+	public BPageInfo articlePage(int curPage, boolean check,HttpServletRequest request)
 	{
 		// 로직
 		
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		
-		
+		HttpSession session = request.getSession();
+		String bUrl = (String)session.getAttribute("bUrl");
 		
 		
 		//총 게시물의 갯수
 		int totalCount = 0;
 		try 
 		{
+			con = dataSource.getConnection();
 			if(check) 
 			{
-				con = dataSource.getConnection();
-				
-				String query = "select count(*) as total from mvc_board";
-				pstmt = con.prepareStatement(query);
-				rs = pstmt.executeQuery();
-				if(rs.next())
-				{
-					totalCount = rs.getInt("total");
+				if(bUrl.equals("list.do"))
+				{			
+					String query = "select count(*) as total from mvc_board where bcheck = 'list' ";
+					pstmt = con.prepareStatement(query);
+					rs = pstmt.executeQuery();
+					if(rs.next())
+					{
+						totalCount = rs.getInt("total");
+					}
 				}
+				else if(bUrl.equals("picture.do"))
+				{
+					String query = "select count(*) as total from mvc_board where bcheck = 'picture' ";
+					pstmt = con.prepareStatement(query);
+					rs = pstmt.executeQuery();
+					if(rs.next())
+					{
+						totalCount = rs.getInt("total");
+					}
+				}
+				
 			}
 			else
 			{
 				con = dataSource.getConnection();
 				
-				String query = "select count(*) as total from notice_board";
+				String query = "select count(*) as total from mvc_board where bcheck = 'notice'";
 				pstmt = con.prepareStatement(query);
 				rs = pstmt.executeQuery();
 				if(rs.next())
@@ -431,7 +505,7 @@ public class BDao {
 		int myCurPage = curPage;
 		if(myCurPage > totalPage)
 			myCurPage = totalPage;
-		if(myCurPage < 1)
+		if(myCurPage <= 1)
 			myCurPage = 1;
 			
 		//시작 페이지
@@ -455,38 +529,96 @@ public class BDao {
 		return pinfo;
 	}
 	
-	public BDto contentView(String strID)
+	public BDto contentView(String strID,HttpServletRequest request)
 	{
+		
 		upHit(strID);
 		
 		BDto dto = null;
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		boolean check = false;
+		
 		
 		try {
-			con = dataSource.getConnection();
+			HttpSession session = request.getSession();
+			String sid = (String)session.getAttribute("id");
 			
-			String query ="select * from mvc_board where bId = ?";
+			if(session.getAttribute("check") != null)
+			{
+				session.removeAttribute("check");
+			}
+			
+			con = dataSource.getConnection();
+			String query = "select bId from mvc_board where bId = ?";
 			pstmt = con.prepareStatement(query);
 			pstmt.setInt(1, Integer.parseInt(strID));
 			rs = pstmt.executeQuery();
 			
 			if(rs.next())
 			{
-				int bId = rs.getInt("bId");
-				String bName = rs.getString("bName");
-				String bTitle = rs.getString("bTitle");
-				String bContent = rs.getString("bContent");
-				Timestamp bDate = rs.getTimestamp("bDate");
-				int bHit = rs.getInt("bHit");
-				int bGroup = rs.getInt("bGroup");
-				int bStep = rs.getInt("bStep");
-				int bIndent = rs.getInt("bIndent");
-				
-				dto = new BDto(bId, bName, bTitle, bContent, bDate,
-								bHit, bGroup, bStep, bIndent);
+				check = true;
 			}
+			
+			if(check)
+			{
+				query ="select * from mvc_board where bId = ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setInt(1, Integer.parseInt(strID));
+				rs = pstmt.executeQuery();
+				
+				if(rs.next())
+				{
+					int bId = rs.getInt("bId");
+					String bName = rs.getString("bName");
+					String bTitle = rs.getString("bTitle");
+					String bContent = rs.getString("bContent");
+					Timestamp bDate = rs.getTimestamp("bDate");
+					int bHit = rs.getInt("bHit");
+					int bGroup = rs.getInt("bGroup");
+					int bStep = rs.getInt("bStep");
+					int bIndent = rs.getInt("bIndent");
+					String bCheck = rs.getString("bCheck");
+					dto = new BDto(bId, bName, bTitle, bContent, bDate,
+							bHit, bGroup, bStep, bIndent, bCheck);
+					if(sid.equals(bName) || sid.equals("master"))
+					{
+						session.setAttribute("check", "yes");
+					}
+				}
+			}
+			else
+			{
+				query ="select * from mvc_board where bId = ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setInt(1, Integer.parseInt(strID));
+				rs = pstmt.executeQuery();
+				
+				if(rs.next())
+				{
+					int bId = rs.getInt("bId");
+					String bName = rs.getString("bName");
+					String bTitle = rs.getString("bTitle");
+					String bContent = rs.getString("bContent");
+					Timestamp bDate = rs.getTimestamp("bDate");
+					int bHit = rs.getInt("bHit");
+					int bGroup = rs.getInt("bGroup");
+					int bStep = rs.getInt("bStep");
+					int bIndent = rs.getInt("bIndent");
+					String bCheck = rs.getString("bCheck");
+					
+					dto = new BDto(bId, bName, bTitle, bContent, bDate,
+									bHit, bGroup, bStep, bIndent, bCheck);
+					
+					if(sid.equals(bName) || sid.equals("master"))
+					{
+						session.setAttribute("check", "yes");
+					}
+				}
+			}
+			
+			
 		}
 		catch(Exception e)
 		{
@@ -546,17 +678,22 @@ public class BDao {
 	
 	public void upHit(String bId)
 	{
+		boolean check = false;
 		Connection con = null;
 		PreparedStatement pstmt = null;
-		
+		ResultSet rs = null; 
 		try {
 			con = dataSource.getConnection();
+
 			
-			String query ="update mvc_board set bHit = bHit + 1 where bId = ?";
-			pstmt = con.prepareStatement(query);
-			pstmt.setString(1, bId);
-			
-			int rn = pstmt.executeUpdate();
+			if(check)
+			{
+				String query ="update mvc_board set bHit = bHit + 1 where bId = ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setInt(1, Integer.parseInt(bId));
+				int rn = pstmt.executeUpdate();
+			}
+		
 		}
 		catch(Exception e)
 		{
@@ -605,14 +742,15 @@ public class BDao {
 		}
 	}
 	
-	public BDto reply_view(String str)
+	public BDto reply_view(String str,HttpServletRequest request)
 	{
 		BDto dto = null;
 		
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		
+		HttpSession session = request.getSession();
+		String bUrl = (String)session.getAttribute("bUrl");
 		try {
 			con = dataSource.getConnection();
 			
@@ -632,9 +770,10 @@ public class BDao {
 				int bGroup = rs.getInt("bGroup");
 				int bStep = rs.getInt("bStep");
 				int bIndent = rs.getInt("bIndent");
+				String bCheck = rs.getString("bCheck");
 				
 				dto = new BDto(bId, bName, bTitle, bContent, bDate,
-								bHit, bGroup, bStep, bIndent);
+								bHit, bGroup, bStep, bIndent,bCheck);
 			}
 		}
 		catch(Exception e)
@@ -657,19 +796,22 @@ public class BDao {
 	}
 	
 	public void reply(String bId, String bName, String bTitle, String bContent,
-						String bGroup, String bStep, String bIndent)
+						String bGroup, String bStep, String bIndent,HttpServletRequest request)
 	{
 		replyShape(bGroup, bStep);
+		HttpSession session = request.getSession();
+		String bUrl = (String)session.getAttribute("bUrl");
 		
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		
 		try {
 			con = dataSource.getConnection();
-			
-			String query = "insert into mvc_board " +
-						   " (bId, bName, bTitle, bContent, bGroup, bStep, bIndent)" +
-						   " values (mvc_board_seq.nextval, ?, ?, ?, ?, ?, ?)";
+			if(bUrl.equals("list.do"))
+			{
+				String query = "insert into mvc_board " +
+						   " (bId, bName, bTitle, bContent, bGroup, bStep, bIndent, bcheck)" +
+						   " values (mvc_board_seq.nextval, ?, ?, ?, ?, ?, ?,'list')";
 			pstmt = con.prepareStatement(query);
 			
 			pstmt.setString(1, bName);
@@ -680,6 +822,8 @@ public class BDao {
 			pstmt.setInt(6, Integer.parseInt(bIndent) + 1);
 			
 			int rn = pstmt.executeUpdate();
+			}
+			
 			
 		}
 		catch(Exception e) {
@@ -744,7 +888,7 @@ public class BDao {
 		try {
 				con = dataSource.getConnection();
 				
-				String query = "select * from (select * from mvc_board order by bhit desc) where rownum <= 3";
+				String query = "select * from (select * from mvc_board where bcheck = 'list' order by bhit desc) where rownum <= 3";
 				pstmt = con.prepareStatement(query);
 				rs = pstmt.executeQuery();
 				
@@ -759,10 +903,10 @@ public class BDao {
 					int bGroup = rs.getInt("bGroup");
 					int bStep = rs.getInt("bStep");
 					int bIndent = rs.getInt("bIndent");
-
-					System.out.println(bTitle);
+					String bCheck = rs.getString("bCheck");
+	
 					BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
-							bHit, bGroup, bStep, bIndent);
+							bHit, bGroup, bStep, bIndent, bCheck);
 				
 					dtos.add(dto);
 				}
@@ -785,49 +929,38 @@ public class BDao {
 		return dtos;
 	}
 	
-	public ArrayList<BDto> tSearch(String search, int curPage)
-	{
+	public ArrayList<BDto> noticeCheck()
+	{	
 		ArrayList<BDto> dtos = new ArrayList<BDto>();
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		
-		int nStart = (curPage - 1) * listCount + 1;
-		int nEnd = (curPage - 1) * listCount + listCount;
-		
 		try {
-			con = dataSource.getConnection();
-			
-			String query = "select * " +
-					   "  from (select rownum num, A.*" +
-					   "  from (select * from mvc_board " + //검색어 추가
-					   "  where bTitle = ? "+
-					   "  order by bgroup desc, bstep asc) A " + 
-					   "  where rownum <= ?) B " +
-					   "  where B.num >= ?";
-			
-			pstmt = con.prepareStatement(query);
-			pstmt.setString(1, search);
-			pstmt.setInt(2, nEnd);
-			pstmt.setInt(3, nStart);
-			rs = pstmt.executeQuery();
-			
-			while(rs.next()) 
-			{
-				int bId = rs.getInt("bId");
-				String bName = rs.getString("bName");
-				String bTitle = rs.getString("bTitle");
-				String bContent = rs.getString("bContent");
-				Timestamp bDate = rs.getTimestamp("bDate");
-				int bHit = rs.getInt("bHit");
-				int bGroup = rs.getInt("bGroup");
-				int bStep = rs.getInt("bStep");
-				int bIndent = rs.getInt("bIndent");
+				con = dataSource.getConnection();
 				
-				BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
-									bHit, bGroup, bStep, bIndent);
-				dtos.add(dto);
-			}
+				String query = "select * from (select * from mvc_board where bcheck = 'notice' order by bid desc) where rownum <= 3";
+				pstmt = con.prepareStatement(query);
+				rs = pstmt.executeQuery();
+				
+				while(rs.next())
+				{
+					int bId = rs.getInt("bId");
+					String bName = rs.getString("bName");
+					String bTitle = rs.getString("bTitle");
+					String bContent = rs.getString("bContent");
+					Timestamp bDate = rs.getTimestamp("bDate");
+					int bHit = rs.getInt("bHit");
+					int bGroup = rs.getInt("bGroup");
+					int bStep = rs.getInt("bStep");
+					int bIndent = rs.getInt("bIndent");
+					String bCheck = rs.getString("bCheck");
+					
+					BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
+							bHit, bGroup, bStep, bIndent, bCheck);
+				
+					dtos.add(dto);
+				}
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -847,12 +980,120 @@ public class BDao {
 		return dtos;
 	}
 	
-	public ArrayList<BDto> iSearch(String search, int curPage)
+	public ArrayList<BDto> tSearch(String search, int curPage,HttpServletRequest request)
 	{
 		ArrayList<BDto> dtos = new ArrayList<BDto>();
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		HttpSession session = request.getSession();
+		String bUrl = (String)session.getAttribute("bUrl");
+		
+		int nStart = (curPage - 1) * listCount + 1;
+		int nEnd = (curPage - 1) * listCount + listCount;
+		
+		try {
+			con = dataSource.getConnection();
+			if(bUrl.equals("list.do"))
+			{
+				String str = "'%" + search + "%'";
+				String query = "select * " +
+						   "  from (select rownum num, A.*" +
+						   "  from (select * from mvc_board " + //검색어 추가
+						   "  where bcheck = 'list' and bTitle like "+ str +
+						   "  order by bgroup desc, bstep asc) A " + 
+						   "  where rownum <= ?) B " +
+						   "  where B.num >= ?";
+				
+				pstmt = con.prepareStatement(query);
+				//pstmt.setString(1, search);
+				pstmt.setInt(1, nEnd);
+				pstmt.setInt(2, nStart);
+				rs = pstmt.executeQuery();
+				
+				while(rs.next()) 
+				{
+					int bId = rs.getInt("bId");
+					String bName = rs.getString("bName");
+					String bTitle = rs.getString("bTitle");
+					String bContent = rs.getString("bContent");
+					Timestamp bDate = rs.getTimestamp("bDate");
+					int bHit = rs.getInt("bHit");
+					int bGroup = rs.getInt("bGroup");
+					int bStep = rs.getInt("bStep");
+					int bIndent = rs.getInt("bIndent");
+					
+					String bCheck = rs.getString("bCheck");
+					
+					BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
+							bHit, bGroup, bStep, bIndent, bCheck);
+					dtos.add(dto);
+				}
+			}
+			else if(bUrl.equals("notice.do"))
+			{
+				String str = "'%" + search + "%'";
+				String query = "select * " +
+						   "  from (select rownum num, A.*" +
+						   "  from (select * from mvc_board " + //검색어 추가
+						   "  where bcheck = 'notice' and bTitle like "+str+
+						   "  order by bgroup desc, bstep asc) A " + 
+						   "  where rownum <= ?) B " +
+						   "  where B.num >= ?";
+				
+				pstmt = con.prepareStatement(query);
+				//pstmt.setString(1, "'%"+search+"%'");
+				pstmt.setInt(1, nEnd);
+				pstmt.setInt(2, nStart);
+				rs = pstmt.executeQuery();
+				
+				while(rs.next()) 
+				{
+					int bId = rs.getInt("bId");
+					String bName = rs.getString("bName");
+					String bTitle = rs.getString("bTitle");
+					String bContent = rs.getString("bContent");
+					Timestamp bDate = rs.getTimestamp("bDate");
+					int bHit = rs.getInt("bHit");
+					int bGroup = rs.getInt("bGroup");
+					int bStep = rs.getInt("bStep");
+					int bIndent = rs.getInt("bIndent");
+					
+					String bCheck = rs.getString("bCheck");
+					
+					BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
+							bHit, bGroup, bStep, bIndent, bCheck);
+					dtos.add(dto);
+				}
+			}
+			
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			try
+			{
+				if(rs != null)rs.close();
+				if(pstmt != null)pstmt.close();
+				if(con != null)con.close();
+			}
+			catch(Exception e2)
+			{
+				e2.printStackTrace();
+			}
+		}
+		return dtos;
+	}
+	
+	public ArrayList<BDto> iSearch(String search, int curPage,HttpServletRequest request)
+	{
+		ArrayList<BDto> dtos = new ArrayList<BDto>();
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		HttpSession session = request.getSession();
+		String bUrl = (String)session.getAttribute("bUrl");
 		
 		int nStart = (curPage - 1) * listCount + 1;
 		int nEnd = (curPage - 1) * listCount + listCount;
@@ -860,36 +1101,77 @@ public class BDao {
 		try 
 		{
 			con = dataSource.getConnection();
-			
-			String query = "select * " +
-					   "  from (select rownum num, A.*" +
-					   "  from (select * from mvc_board " + //검색어 추가
-					   "  where bName = ? "+
-					   "  order by bgroup desc, bstep asc) A " + 
-					   "  where rownum <= ?) B " +
-					   "  where B.num >= ?";
-			
-			pstmt = con.prepareStatement(query);
-			pstmt.setString(1, search);
-			pstmt.setInt(2, nEnd);
-			pstmt.setInt(3, nStart);
-			rs = pstmt.executeQuery();
-			
-			while(rs.next()) {
-				int bId = rs.getInt("bId");
-				String bName = rs.getString("bName");
-				String bTitle = rs.getString("bTitle");
-				String bContent = rs.getString("bContent");
-				Timestamp bDate = rs.getTimestamp("bDate");
-				int bHit = rs.getInt("bHit");
-				int bGroup = rs.getInt("bGroup");
-				int bStep = rs.getInt("bStep");
-				int bIndent = rs.getInt("bIndent");
+			if(bUrl.equals("list.do"))
+			{
+				String str = "'%" + search + "%'";
+				String query = "select * " +
+						   "  from (select rownum num, A.*" +
+						   "  from (select * from mvc_board " + //검색어 추가
+						   "  where bcheck='list' and bName like "+str+
+						   "  order by bgroup desc, bstep asc) A " + 
+						   "  where rownum <= ?) B " +
+						   "  where B.num >= ?";
 				
-				BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
-									bHit, bGroup, bStep, bIndent);
-				dtos.add(dto);
+				pstmt = con.prepareStatement(query);
+				//pstmt.setString(1, "%"+search+"%");
+				pstmt.setInt(1, nEnd);
+				pstmt.setInt(2, nStart);
+				rs = pstmt.executeQuery();
+				
+				while(rs.next()) {
+					int bId = rs.getInt("bId");
+					String bName = rs.getString("bName");
+					String bTitle = rs.getString("bTitle");
+					String bContent = rs.getString("bContent");
+					Timestamp bDate = rs.getTimestamp("bDate");
+					int bHit = rs.getInt("bHit");
+					int bGroup = rs.getInt("bGroup");
+					int bStep = rs.getInt("bStep");
+					int bIndent = rs.getInt("bIndent");
+					
+					String bCheck = rs.getString("bCheck");
+					
+					BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
+							bHit, bGroup, bStep, bIndent, bCheck);
+					dtos.add(dto);
+				}
 			}
+			else if(bUrl.equals("notice.do"))
+			{
+				String str = "'%" + search + "%'";
+				String query = "select * " +
+						   "  from (select rownum num, A.*" +
+						   "  from (select * from mvc_board " + //검색어 추가
+						   "  where bcheck='notice' and bName like "+str+
+						   "  order by bgroup desc, bstep asc) A " + 
+						   "  where rownum <= ?) B " +
+						   "  where B.num >= ?";
+				
+				pstmt = con.prepareStatement(query);
+				//pstmt.setString(1, search);
+				pstmt.setInt(1, nEnd);
+				pstmt.setInt(2, nStart);
+				rs = pstmt.executeQuery();
+				
+				while(rs.next()) {
+					int bId = rs.getInt("bId");
+					String bName = rs.getString("bName");
+					String bTitle = rs.getString("bTitle");
+					String bContent = rs.getString("bContent");
+					Timestamp bDate = rs.getTimestamp("bDate");
+					int bHit = rs.getInt("bHit");
+					int bGroup = rs.getInt("bGroup");
+					int bStep = rs.getInt("bStep");
+					int bIndent = rs.getInt("bIndent");
+					
+					String bCheck = rs.getString("bCheck");
+					
+					BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
+							bHit, bGroup, bStep, bIndent, bCheck);
+					dtos.add(dto);
+				}
+			}
+			
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -915,7 +1197,8 @@ public class BDao {
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-	
+		HttpSession session = request.getSession();
+		String bUrl = (String)session.getAttribute("bUrl");
 		//총 게시물의 갯수
 		int totalCount = 0;
 		try 
@@ -923,27 +1206,58 @@ public class BDao {
 			if(request.getParameter("bSearch").equals("bTitle"))
 			{
 				con = dataSource.getConnection();
-				
-				String query = "select count(*) as total from mvc_board where bTitle = ?";
-				pstmt = con.prepareStatement(query);
-				pstmt.setString(1, search);
-				rs = pstmt.executeQuery();
-				if(rs.next())
+				if(bUrl.equals("list.do"))
 				{
-					totalCount = rs.getInt("total");
+					String str = "'%" + search + "%'";
+					String query = "select count(*) as total from mvc_board where bcheck = 'list' and bTitle like "+str;
+					pstmt = con.prepareStatement(query);
+					//pstmt.setString(1, "%"+search+"%");
+					rs = pstmt.executeQuery();
+					if(rs.next())
+					{
+						totalCount = rs.getInt("total");
+					}
 				}
+				else if(bUrl.equals("notice.do"))
+				{
+					String str = "'%" + search + "%'";
+					String query = "select count(*) as total from mvc_board where bcheck = 'notice' and bTitle like "+str;
+					pstmt = con.prepareStatement(query);
+					//pstmt.setString(1, "%"+search+"%");
+					rs = pstmt.executeQuery();
+					if(rs.next())
+					{
+						totalCount = rs.getInt("total");
+					}
+				}
+				
 			}
 			else
 			{
 				con = dataSource.getConnection();
-				
-				String query = "select count(*) as total from mvc_board where bName = ?";
-				pstmt = con.prepareStatement(query);
-				pstmt.setString(1, search);
-				rs = pstmt.executeQuery();
-				if(rs.next())
+				if(bUrl.equals("list.do"))
 				{
-					totalCount = rs.getInt("total");
+					String str = "'%" + search + "%'";
+					String query = "select count(*) as total from mvc_board where bcheck = 'list' and bName like "+str;
+					pstmt = con.prepareStatement(query);
+					//pstmt.setString(1, "%"+search+"%");
+					rs = pstmt.executeQuery();
+					if(rs.next())
+					{
+						totalCount = rs.getInt("total");
+					}
+				}
+				else if(bUrl.equals("notice.do"))
+				{
+					String str = "'%" + search + "%'";
+					String query = "select count(*) as total from mvc_board where bcheck = 'notice' and bName like "+str;
+					pstmt = con.prepareStatement(query);
+					//pstmt.setString(1, "%"+search+"%");
+					rs = pstmt.executeQuery();
+					if(rs.next())
+					{
+						totalCount = rs.getInt("total");
+					}
 				}
 			}
 		}
@@ -1070,7 +1384,7 @@ public class BDao {
 			con = dataSource.getConnection();
 			String query = "select * " +
 						   "  from (select rownum num, A.*" +
-						   "  from (select * from notice_board " + //검색어 추가
+						   "  from (select * from mvc_board where bcheck = 'notice' " + //검색어 추가
 						   "  order by bgroup desc, bstep asc) A " + 
 						   "  where rownum <= ?) B " +
 						   " where B.num >= ?";
@@ -1090,8 +1404,10 @@ public class BDao {
 				int bStep = rs.getInt("bStep");
 				int bIndent = rs.getInt("bIndent");
 					
+				String bCheck = rs.getString("bCheck");
+				
 				BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
-									bHit, bGroup, bStep, bIndent);
+						bHit, bGroup, bStep, bIndent, bCheck);
 				dtos.add(dto);
 			}
 		}

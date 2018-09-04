@@ -8,6 +8,7 @@
 <%
 	}
 %>
+<%session.setAttribute("bUrl", "first.do"); %>
 
 <!DOCTYPE html>
 <html>
@@ -39,7 +40,15 @@
    		display: inline;
    		margin: 60px;
    }
+   
+   img{
+   		max-width: 100%;
+		width: 600px;
+		max-height: 100%;
+		height:600px;
+   }
 </style>
+
 </head>
 <body>
 <div class="container">
@@ -52,7 +61,8 @@
             <a class="blog-header-logo text-dark" href="first.jsp">Project Web Site</a>
           </div>
           <div class="col-4 d-flex justify-content-end align-items-center">
-          <%if(session.getAttribute("id") == null) {%>       
+          <%if(session.getAttribute("id") == null) {%>
+          	      
             <a class="btn btn-sm btn-outline-secondary" href="join.jsp">회원가입</a> &nbsp;
             <a class="btn btn-sm btn-outline-secondary" href="login.jsp">로그인</a>         
          <%} else { %>
@@ -70,7 +80,7 @@
         <ul>
         	<li><a class="p-2 text-muted" href="notice.do">공지사항</a></li>
         	<li><a class="p-2 text-muted" href="chatt.do">대화방</a></li>
-        	<li><a class="p-2 text-muted" href="list.do">글 게시판</a></li>
+        	<li><a class="p-2 text-muted" href="list.do">자유 게시판</a></li>
         	<li><a class="p-2 text-muted" href="picture.do">사진 게시판</a></li>
         	<li><a class="p-2 text-muted" href="modify.jsp">내 정보</a></li>
         </ul>
@@ -80,43 +90,68 @@
 
       
         <div class="col-md-12 px-0">
-        	<img src="호수.jpg" style="height:100%; width:100%; object-fit:contain">
+        	<div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+  				<div class="carousel-inner">
+    				<div class="carousel-item active">
+      					<img class="d-block w-100" src="./pictures/산.jpg" alt="첫번째 슬라이드">
+    				</div>
+    				<div class="carousel-item">
+      					<img class="d-block w-100" src="./pictures/위인.jpg" alt="두번째 슬라이드">
+    				</div>
+    				<div class="carousel-item">
+      					<img class="d-block w-100" src="./pictures/호수.jpg" alt="세번째 슬라이드">
+    				</div>
+  				</div>
+  					<a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+    					<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    					<span class="sr-only">이전</span>
+ 	 				</a>
+  					<a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+    					<span class="carousel-control-next-icon" aria-hidden="true"></span>
+    					<span class="sr-only">다음</span>
+  					</a>
+			</div>
         </div>
       
-
-      <div class="row mb-2" >
-        <div class="col-md-6" >
-          <div class="card flex-md-row mb-4 shadow-sm h-md-250">
-            <div class="card-body d-flex flex-column align-items-start" style="overflow:auto;">
-              <strong class="d-inline-block mb-2 text-success">베스트 게시글</strong>      
-               	 <c:choose>
-               	 	<c:when test="${best == null}">
-               	 		게시물이 없습니다.
-               	 		<hr>
-               	 	</c:when>
-               	 	<c:otherwise>
-               	 		<c:forEach items="${best}" var="best">
-               	 			<a href="#"><h3>제목 : ${best.bTitle }</h3></a> <br>
-               	 			아이디 : ${best.bName} &nbsp;&nbsp; 게시일 : ${best.bDate } &nbsp;&nbsp;<br> 조회수 : ${best.bHit }회 <br>
-               	 			<%out.println("-----------------------------------------------------------------"); %>
-               	 		</c:forEach>             	 		
-               	 	</c:otherwise>
-               	 </c:choose>
-            </div>         
-          </div>
-        </div>
+      	<div class="row mb-2" >
+        	<div class="col-md-6" >
+          		<div class="card flex-md-row mb-4 shadow-sm h-md-250">
+            		<div class="card-body d-flex flex-column align-items-start" style="overflow:auto;">
+              			<strong class="d-inline-block mb-2 text-success">베스트 게시글</strong>      
+               	 		<c:choose>
+               	 			<c:when test="${best == null}">
+               	 				게시물이 없습니다.
+               	 				<hr>
+               	 			</c:when>
+               	 			<c:otherwise>
+               	 				<c:forEach items="${best}" var="best">
+               	 					<a href="content_view.do?bId=${best.bId}" onclick="change()"><h3>제목 : ${best.bTitle }</h3></a> <br>
+               	 					아이디 : ${best.bName} &nbsp;&nbsp; 게시일 : ${best.bDate } &nbsp;&nbsp;<br> 조회수 : ${best.bHit }회 <br>
+               	 					<%out.println("-----------------------------------------------------------------"); %>
+               	 				</c:forEach>             	 		
+               	 			</c:otherwise>
+               	 		</c:choose>
+            		</div>         
+          		</div>
+        	</div>
         <div class="col-md-6">
           <div class="card flex-md-row mb-4 shadow-sm h-md-250">
-            <div class="card-body d-flex flex-column align-items-start">
-              <strong class="d-inline-block mb-2 text-success">Design</strong>
-              <h3 class="mb-0">
-                <a class="text-dark" href="#">Post title</a>
-              </h3>
-              <div class="mb-1 text-muted">Nov 11</div>
-              <p class="card-text mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
-              <a href="#">Continue reading</a>
-            </div>
-            <img class="card-img-right flex-auto d-none d-lg-block" data-src="holder.js/200x250?theme=thumb" alt="Card image cap">
+            <div class="card-body d-flex flex-column align-items-start" style="overflow:auto;">
+              <strong class="d-inline-block mb-2 text-success">공지사항</strong>
+              <c:choose>
+               	 <c:when test="${notice == null}">
+               	 	게시물이 없습니다.
+               	 	<hr>
+               	 </c:when>
+               	 <c:otherwise>
+               	 	<c:forEach items="${notice}" var="notice">
+               	 		<a href="content_view.do?bId=${notice.bId}" onclick="change2()"><h3>제목 : ${notice.bTitle }</h3></a> <br>
+               	 			아이디 : ${notice.bName} &nbsp;&nbsp; 게시일 : ${notice.bDate } &nbsp;&nbsp;<br> 조회수 : ${notice.bHit }회 <br>
+               	 			<%out.println("-----------------------------------------------------------------"); %>
+               	 	</c:forEach>             	 		
+               	 </c:otherwise>
+              </c:choose>
+            </div>     
           </div>
         </div>
       </div>

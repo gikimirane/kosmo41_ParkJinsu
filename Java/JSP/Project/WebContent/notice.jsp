@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
+<%session.setAttribute("bUrl", "notice.do"); %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -77,7 +78,7 @@
           		
           	</div>
        		<div class="col-4 text-center">
-            	<a class="blog-header-logo text-dark" href="first.jsp">글 게시판</a>
+            	<a class="blog-header-logo text-dark" href="first.jsp">자유 게시판</a>
         	</div>
         	<div class="col-4 d-flex justify-content-end align-items-center">
         	</div>
@@ -86,7 +87,7 @@
        		<nav class="nav d-flex justify-content-between">
           		<a class="p-2 text-muted" href="notice.do">공지사항</a>
           		<a class="p-2 text-muted" href="chatt.do">대화방</a>
-          		<a class="p-2 text-muted" href="list.do">글 게시판</a>
+          		<a class="p-2 text-muted" href="list.do">자유 게시판</a>
           		<a class="p-2 text-muted" href="picture.do">사진 게시판</a>
           		<a class="p-2 text-muted" href="modify.jsp">내 정보</a>       
         	</nav>
@@ -101,7 +102,7 @@
       			<th scope="col">조회수</th>
     		</tr>
   		</thead>
-  	<c:forEach items="${notice}" var="notice" >
+  	<c:forEach items="${list}" var="notice" >
     	<tr>
       		<th scope="row">${notice.bId}</th>
       		<td>${notice.bName}</td>
