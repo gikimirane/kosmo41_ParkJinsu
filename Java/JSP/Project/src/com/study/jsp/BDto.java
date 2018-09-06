@@ -16,6 +16,22 @@ public class BDto {
 	String bCheck;
 	String fileName;
 	
+
+	public String getFileName() {
+		return fileName;
+	}
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+	public String getSysFile() {
+		return sysFile;
+	}
+	public void setSysFile(String sysFile) {
+		this.sysFile = sysFile;
+	}
+
+	String sysFile;
+	
 	
 
 	private String id;
@@ -30,18 +46,14 @@ public class BDto {
 	public BDto() {
 		
 	}
-
-	public String getfileName() {
-		return fileName;
-	}
-
-	public void setfileName(String fileName) {
+	public BDto(String fileName, String sysFile) {
 		this.fileName = fileName;
+		this.sysFile = sysFile;
 	}
 
 	public BDto(int bId, String bName, String bTitle, String bContent, 
 			Timestamp bDate, int bHit, int bGroup, int bStep, 
-			int bIndent,String bCheck, String fileName)
+			int bIndent,String bCheck,String fileName, String sysFile)
 	{
 		this.bId = bId;
 		this.bName = bName;
@@ -54,6 +66,7 @@ public class BDto {
 		this.bIndent = bIndent;
 		this.bCheck = bCheck;
 		this.fileName = fileName;
+		this.sysFile = sysFile;
 	}
 	
 	

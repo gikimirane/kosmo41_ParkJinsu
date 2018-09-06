@@ -1,6 +1,11 @@
 package com.study.jsp;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +15,7 @@ import java.util.Enumeration;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -275,21 +281,18 @@ public class BDao {
 	
 	
 	
-	public void write(String bName, String bTitle, String bContent,HttpServletRequest request, ArrayList<FDto> dto) 
+	public void write(String bName, String bTitle, String bContent,HttpServletRequest request) 
 	{
-		String fileName = dto.get(0).getOriFile();
-		System.out.println(fileName);
-		String sysFile = dto.get(0).getFile();
+
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		
 		String check = (String)request.getAttribute("bCheck");
 		try {
-
 			String query = "insert into mvc_board " + 
-						  " (bId, bName, bTitle, bContent, bHit, bGroup, bStep, bIndent, bcheck, fileName, sysfile) " +
+						  " (bId, bName, bTitle, bContent, bHit, bGroup, bStep, bIndent, bcheck) " +
 						  " values " +
-						  " (mvc_board_seq.nextval, ?, ?, ?, 0, mvc_board_seq.currval, 0, 0, ?, ?,?)";
+						  " (mvc_board_seq.nextval, ?, ?, ?, 0, mvc_board_seq.currval, 0, 0, ?)";
 				
 			con = dataSource.getConnection();
 			pstmt = con.prepareStatement(query);
@@ -297,8 +300,7 @@ public class BDao {
 			pstmt.setString(2, bTitle);
 			pstmt.setString(3, bContent);
 			pstmt.setString(4, check);
-			pstmt.setString(5, fileName);
-			pstmt.setString(6, sysFile);
+
 			int rn = pstmt.executeUpdate();		
 		}
 		catch(Exception e)
@@ -360,9 +362,10 @@ public class BDao {
 				int bIndent = rs.getInt("bIndent");
 				String bCheck = rs.getString("bCheck");
 				String fileName = rs.getString("fileName");
+				String sysFile = rs.getString("sysFile");
 					
 				BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
-										bHit, bGroup, bStep, bIndent, bCheck, fileName);
+										bHit, bGroup, bStep, bIndent, bCheck,fileName,sysFile);
 				dtos.add(dto);
 			}			
 		}
@@ -462,12 +465,11 @@ public class BDao {
 		upHit(strID);
 		
 		BDto dto = null;
+	
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		boolean check = false;
-		
-		
+				
 		try {
 			HttpSession session = request.getSession();
 			String sid = (String)session.getAttribute("id");
@@ -478,53 +480,43 @@ public class BDao {
 			}
 			
 			con = dataSource.getConnection();
-//			String query = "select bId from mvc_board where bId = ?";
-//			pstmt = con.prepareStatement(query);
-//			pstmt.setInt(1, Integer.parseInt(strID));
-//			rs = pstmt.executeQuery();
-//			
-//			if(rs.next())
-//			{
-//				check = true;
-//			}
-//			
-//			if(check)
-//			{
-				String query ="select * from mvc_board where bId = ?";
-				pstmt = con.prepareStatement(query);
-				pstmt.setInt(1, Integer.parseInt(strID));
-				rs = pstmt.executeQuery();
+
+			String query ="select * from mvc_board where bId = ?";
+			pstmt = con.prepareStatement(query);
+			pstmt.setInt(1, Integer.parseInt(strID));
+			rs = pstmt.executeQuery();
 				
-				if(rs.next())
-				{
-					int bId = rs.getInt("bId");
-					String bName = rs.getString("bName");
-					String bTitle = rs.getString("bTitle");
-					String bContent = rs.getString("bContent");
-					Timestamp bDate = rs.getTimestamp("bDate");
-					int bHit = rs.getInt("bHit");
-					int bGroup = rs.getInt("bGroup");
-					int bStep = rs.getInt("bStep");
-					int bIndent = rs.getInt("bIndent");
-					String bCheck = rs.getString("bCheck");
-					String fileName = rs.getString("fileName");
+			if(rs.next())
+			{
+				int bId = rs.getInt("bId");
+				String bName = rs.getString("bName");
+				String bTitle = rs.getString("bTitle");
+				String bContent = rs.getString("bContent");
+				Timestamp bDate = rs.getTimestamp("bDate");
+				int bHit = rs.getInt("bHit");
+				int bGroup = rs.getInt("bGroup");
+				int bStep = rs.getInt("bStep");
+				int bIndent = rs.getInt("bIndent");
+				String bCheck = rs.getString("bCheck");
+				String fileName = rs.getString("fileName");
+				String sysFile = rs.getString("sysFile");
 					
-					dto = new BDto(bId, bName, bTitle, bContent, bDate,
-							bHit, bGroup, bStep, bIndent, bCheck, fileName);
-					if(sid.equals(bName) || sid.equals("master"))
-					{
-						session.setAttribute("check", "yes");
-					}
-					if(fileName != null)
-					{
-						session.setAttribute("pic", "yes");
-					}
-					else
-					{
-						session.setAttribute("pic", "no");
-					}
+				dto = new BDto(bId, bName, bTitle, bContent, bDate,
+						bHit, bGroup, bStep, bIndent, bCheck, fileName, sysFile);
+				
+				if(sid.equals(bName) || sid.equals("master"))
+				{
+					session.setAttribute("check", "yes");
 				}
-//			}			
+				if(sysFile != null)
+				{
+					session.setAttribute("pic", "yes");
+				}
+				else
+				{
+					session.setAttribute("pic", "no");
+				}
+			}		
 		}
 		catch(Exception e)
 		{
@@ -673,9 +665,10 @@ public class BDao {
 				int bIndent = rs.getInt("bIndent");
 				String bCheck = rs.getString("bCheck");
 				String fileName = rs.getString("fileName");
+				String sysFile = rs.getString("sysFile");
 				
 				dto = new BDto(bId, bName, bTitle, bContent, bDate,
-								bHit, bGroup, bStep, bIndent,bCheck, fileName);
+								bHit, bGroup, bStep, bIndent,bCheck,fileName,sysFile);
 			}
 		}
 		catch(Exception e)
@@ -806,9 +799,10 @@ public class BDao {
 					int bIndent = rs.getInt("bIndent");
 					String bCheck = rs.getString("bCheck");
 					String fileName = rs.getString("fileName");
+					String sysFile = rs.getString("sysFile");
 					
 					BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
-							bHit, bGroup, bStep, bIndent, bCheck, fileName);
+							bHit, bGroup, bStep, bIndent, bCheck,fileName,sysFile);
 				
 					dtos.add(dto);
 				}
@@ -858,9 +852,10 @@ public class BDao {
 					int bIndent = rs.getInt("bIndent");
 					String bCheck = rs.getString("bCheck");
 					String fileName = rs.getString("fileName");
+					String sysFile = rs.getString("sysFile");
 					
 					BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
-							bHit, bGroup, bStep, bIndent, bCheck, fileName);
+							bHit, bGroup, bStep, bIndent, bCheck,fileName,sysFile);
 				
 					dtos.add(dto);
 				}
@@ -928,9 +923,10 @@ public class BDao {
 					
 				String bCheck = rs.getString("bCheck");
 				String fileName = rs.getString("fileName");
+				String sysFile = rs.getString("sysFile");
 				
 				BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
-							bHit, bGroup, bStep, bIndent, bCheck, fileName);
+							bHit, bGroup, bStep, bIndent, bCheck,fileName,sysFile);
 				dtos.add(dto);
 			}			
 		}
@@ -996,9 +992,10 @@ public class BDao {
 					
 				String bCheck = rs.getString("bCheck");
 				String fileName = rs.getString("fileName");
+				String sysFile = rs.getString("sysFile");
 				
 				BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
-						bHit, bGroup, bStep, bIndent, bCheck, fileName);
+						bHit, bGroup, bStep, bIndent, bCheck,fileName,sysFile);
 				dtos.add(dto);
 
 			}	
@@ -1212,14 +1209,15 @@ public class BDao {
 					
 				String bCheck = rs.getString("bCheck");
 				String fileName = rs.getString("fileName");
+				String sysFile = rs.getString("sysFile");
 				
 				BDto dto = new BDto(bId, bName, bTitle, bContent, bDate,
-						bHit, bGroup, bStep, bIndent, bCheck, fileName);
+						bHit, bGroup, bStep, bIndent, bCheck,fileName,sysFile);
 				dtos.add(dto);
 			}
 		}
 		catch(Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(); 
 		}
 		finally {
 			try
@@ -1236,34 +1234,35 @@ public class BDao {
 		return dtos;
 	}
 	
-	public ArrayList<FDto> upLoad(HttpServletRequest request, HttpServletResponse response)
+	public ArrayList<BDto> upLoad(HttpServletRequest request, HttpServletResponse response)
 	{
-		ArrayList<FDto> dtos = new ArrayList<>();
+		ArrayList<BDto> dtos = new ArrayList<>();
 		String path = request.getRealPath("PUpload");
 		HttpSession session = request.getSession();
 		
 		int size = 1024 * 1024 * 10; // 10M
-		String file = "";
-		String oriFile = "";
+		String fileName = "";
+		String sysFile = "";
 		
 		try {
 			MultipartRequest multi = new MultipartRequest(request, path, size,
 											"UTF-8", new DefaultFileRenamePolicy());
-			Enumeration files = multi.getFileNames();
-			String str = (String)files.nextElement();
-			
-			file = multi.getFilesystemName(str);
-			oriFile = multi.getOriginalFileName(str);
 			
 			String bName = multi.getParameter("bName");
 			String bTitle = multi.getParameter("bTitle");
 			String bContent = multi.getParameter("bContent");
 			
+			Enumeration files = multi.getFileNames();
+			String str = (String)files.nextElement();
+			
+			fileName = multi.getOriginalFileName(str);
+			sysFile = multi.getFilesystemName(str);
+
 			session.setAttribute("bName", bName);
 			session.setAttribute("bTitle", bTitle);
 			session.setAttribute("bContent", bContent);
 			
-			FDto dto = new FDto(file, oriFile);
+			BDto dto = new BDto(fileName, sysFile);
 			dtos.add(dto);
 		}
 		catch(Exception e) {
@@ -1271,4 +1270,265 @@ public class BDao {
 		}
 		return dtos;
 	}
+	
+	public void upWrite(String bName, String bTitle, String bContent,HttpServletRequest request, ArrayList<BDto> dto)
+	{
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		String fileName = dto.get(0).getFileName();
+		String sysFile = dto.get(0).getSysFile();
+		String check = (String)request.getAttribute("bCheck");
+		
+
+		try {
+			String query = "insert into mvc_board " + 
+						  " (bId, bName, bTitle, bContent, bHit, bGroup, bStep, bIndent, bcheck, fileName, sysFile) " +
+						  " values " +
+						  " (mvc_board_seq.nextval, ?, ?, ?, 0, mvc_board_seq.currval, 0, 0, ?,?,?)";
+				
+			con = dataSource.getConnection();
+			pstmt = con.prepareStatement(query);
+			pstmt.setString(1, bName);
+			pstmt.setString(2, bTitle);
+			pstmt.setString(3, bContent);
+			pstmt.setString(4, check);
+			pstmt.setString(5, fileName);
+			pstmt.setString(6, sysFile);
+
+			int rn = pstmt.executeUpdate();		
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally {
+			try
+			{
+				if(pstmt != null)pstmt.close();
+				if(con != null)con.close();
+			}
+			catch(Exception e2)
+			{
+				e2.printStackTrace();
+			}
+		}
+	}
+	
+	public BDto getArticle(int idx)
+	{
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String query = "select * from mvc_board where bId = ?";
+		BDto dto = null;	
+		try
+		{
+			con = dataSource.getConnection();
+			pstmt = con.prepareStatement(query);
+			pstmt.setInt(1, idx);
+			rs = pstmt.executeQuery();
+			
+			if(rs.next())
+			{
+				dto = new BDto();
+				dto.setbId(rs.getInt("bId"));
+				dto.setbName(rs.getString("bName"));
+				dto.setbTitle(rs.getString("bTitle"));
+				dto.setbContent(rs.getString("bContent"));
+				dto.setbDate(rs.getTimestamp("bDate"));
+				dto.setbHit(rs.getInt("bHit"));
+				dto.setbGroup(rs.getInt("bGroup")); 
+				dto.setbStep(rs.getInt("bStep")); 
+				dto.setbIndent(rs.getInt("bIndent")); 
+				dto.setbCheck(rs.getString("bCheck")); 
+				dto.setFileName(rs.getString("fileName")); 
+				dto.setSysFile(rs.getString("sysFile"));
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally {
+			try
+			{
+				rs.close();
+				pstmt.close();
+				con.close();
+			}
+			catch(Exception e2)
+			{
+				e2.printStackTrace();
+			}
+		}
+		return dto;
+	}
+	
+	public Object downLoad(HttpServletRequest request, HttpServletResponse response)
+	{
+		
+		try
+		{
+			request.setCharacterEncoding("UTF-8");
+			
+			int idx = Integer.parseInt(request.getParameter("bId"));
+			BDto article = BDao.getInstance().getArticle(idx);
+			
+			String filename = article.getSysFile();
+			
+			String uploadFileName = request.getRealPath("/PUpload") + "/" + filename;
+			
+			File downFile = new File(uploadFileName);
+			
+			if(downFile.exists() && downFile.isFile()) {
+				try {
+					long filesize = downFile.length();
+					
+					response.setContentType("application/x-msdownload");
+					response.setContentLength((int)filesize);
+					String strClient = request.getHeader("user-agent");
+					
+					if(strClient.indexOf("MSIE 5.5") != -1)
+					{
+						response.setHeader("Content-Disposition", "filename="+filename+";");
+					}
+					else {
+						response.setHeader("Content-Disposition", "attachment; filename="+filename+";");
+					}
+					response.setHeader("Content-Length", String.valueOf(filesize));
+					response.setHeader("Content-Transfer-Encoding", "binary;");
+					response.setHeader("Pragma", "no-cache");
+					response.setHeader("Cache-Control", "private");
+					
+					byte b[] = new byte[1024];
+					
+					BufferedInputStream fin = new BufferedInputStream(new FileInputStream(downFile));
+					BufferedOutputStream outs = new BufferedOutputStream(response.getOutputStream());
+					
+					int read = 0;
+					
+					while((read = fin.read(b)) != -1) {
+						outs.write(b, 0, read);
+					}
+					outs.flush();
+					outs.close();
+					fin.close();
+				}
+				catch(Exception e) {
+					e.getMessage();
+				}
+			}
+			else {
+				System.out.println("download error : downfile error ["+downFile+"]");
+			}
+//			//업로드 폴더 위치와 업로드 폴더의 이름
+//			String savePath = "PUpload";
+//			ServletContext context = request.getSession().getServletContext();
+//			
+//			//갖고 온 위치에 연결해서 파일 다운로드
+//			String sDownPath = context.getRealPath(savePath);
+//						
+//			String sFilePath = sDownPath + "\\" + sysFile;
+//			//위 문자열을 파일로 인식해야 함
+//			File oFile = new File(sFilePath);
+//			
+//			if(oFile.exists() && oFile.isFile()) {
+//				try
+//				{
+//					long fileSize = oFile.length();
+//					
+//					response.setContentType("application/octet-stream");
+//					
+//					response.setContentLength((int)fileSize);
+//					
+//					String strClient = request.getHeader("user-agent");
+//					
+//					if(strClient.indexOf("MSIE 5.5") != -1) {
+//						response.setHeader("Content-Disposition", "sysFile=" + sysFile+";");
+//					}
+//					else {
+//						sysFile = URLEncoder.encode(sysFile, "UTF-8").replaceAll("\\+", "%20");
+//						response.setHeader("Content-Disposition", "attachment; sysFile="+sysFile+";");
+//					}
+//					
+//					response.setHeader("Content-Length", String.valueOf(fileSize));
+//					response.setHeader("Content-Transfer-Encoding", "binary;");
+//					response.setHeader("Pragma", "no-cache");
+//					response.setHeader("Cache-Control", "private");
+//					
+//					byte b[] = new byte[(int)fileSize];
+//					
+//					BufferedInputStream ins = new BufferedInputStream(new FileInputStream(oFile));
+//					
+//					BufferedOutputStream outs = new BufferedOutputStream(response.getOutputStream());
+//						
+//					int read = 0;
+//					
+//					while((read = ins.read(b)) != -1) {
+//						outs.write(b, 0, read);
+//					}
+//					outs.flush();
+//					outs.close();
+//					ins.close();
+//				}
+//				catch(Exception e) {
+//					System.out.println("에러1");
+//				}
+//			}
+//			else {
+//				System.out.println("파일 다운 에러");
+//			}
+			
+//			//읽어와야 할 용량은 최대 업로드 용량을 초과하지 않는다.
+//			byte [] b = new byte[10*1024*1024];
+//			
+//			FileInputStream in = new FileInputStream(oFile);
+//			
+//			System.out.println("in = " +in);
+//			
+////			//유형 확인  - 읽어올 경로의 파일의 유형 -> 페이지 생성할 때 타입을 설정
+//			String sMimeType = request.getSession().getServletContext().getMimeType(sFilePath);
+//			//파일 다운로드 시작
+//
+//			response.setContentType(sMimeType); //text/html; charset=utf-8
+//			
+//			//업로드 파일의 제목이 깨질 수 있음.//URLEncode
+//			//String sEncoding = newString(fileName.getBytes(euc-kr").8859-1");
+//			String A = new String(sysFile.getBytes("euc-kr"),"8859_1");
+//			String B = "utf-8";
+//			String sEncoding = URLEncoder.encode(A, B);
+//			
+//			//기타 내용을 헤더에 올려야 한다.
+//			//기타 내용을 보고 브라우저에서 다운로드 시 화면에 출력
+//			
+//			String AA = "Content-Disposition";
+//			String BB = "attachment; sysFile="+sEncoding;
+//			
+//			response.setHeader(AA, BB);
+//			
+//			//브라우저에 쓰기
+//			ServletOutputStream out2 = response.getOutputStream();
+//			
+//			int numRead = 0;
+//			
+//			//바이트 배열 b의 0번부터 numRead번까지 브라우저로 출력
+//			
+//			while((numRead=in.read(b,0,b.length))!=-1)
+//			{
+//				out2.write(b, 0, numRead);
+//			}
+//			
+//			out2.flush();
+//			out2.close();
+//			in.close();
+		}
+		
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+				
+		return null;
+	}
+	
 }

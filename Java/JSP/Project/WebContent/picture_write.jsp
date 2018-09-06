@@ -72,7 +72,7 @@ function form_check() {
 	<header class="blog-header py-3">
 		<div class="row flex-nowrap justify-content-between align-items-center">
         	<div class="col-4 pt-1">
-          		<a href="picture_view.do" class="badge badge-primary"><h5>글작성</h5></a>
+          		<a href="write_view.do" class="badge badge-primary"><h5>글작성</h5></a>
           	</div>
         <div class="col-4 text-center">
             <a class="blog-header-logo text-dark" href="first.jsp">Project Web Site</a>

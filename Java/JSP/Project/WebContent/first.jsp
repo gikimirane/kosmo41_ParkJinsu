@@ -69,7 +69,7 @@
          	<%=session.getAttribute("id") %>님 안녕하세요! &nbsp;&nbsp;
          	<a href = "logout.do">로그아웃</a>
          	<%} %>
-        </div>
+          </div>
         <div class="col-4 text-center">
         
         </div>

@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSession;
 import com.study.jsp.command.BCommand;
 import com.study.jsp.command.BContentCommand;
 import com.study.jsp.command.BDeleteCommand;
+import com.study.jsp.command.BDownCommand;
 import com.study.jsp.command.BFirstCommand;
 import com.study.jsp.command.BListCommand;
 import com.study.jsp.command.BModifyCommand;
@@ -262,10 +263,19 @@ public class FrontController extends HttpServlet {
 		}
 		else if(com.equals("/picture_upload.do"))
 		{
+			
 			request.setAttribute("bCheck", "picture");
 			command = new BUploadCommand(); 
 			command.execute(request, response);
 			viewPage="picture.do";
+		}
+		else if(com.equals("/download.do"))
+		{
+			
+			request.setAttribute("bCheck", "picture");
+			command = new BDownCommand(); 
+			command.execute(request, response);
+			viewPage="/content_view.do";
 		}
 
 

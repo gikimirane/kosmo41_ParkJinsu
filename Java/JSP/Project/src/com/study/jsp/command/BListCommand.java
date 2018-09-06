@@ -16,7 +16,6 @@ public class BListCommand implements BCommand {
 	@Override
 	public void execute(HttpServletRequest request, HttpServletResponse response) 
 	{ 
-		boolean check = true;
 		int nPage = 1;
 		try {
 			String sPage = request.getParameter("page");

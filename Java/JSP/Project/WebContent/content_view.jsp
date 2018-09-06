@@ -48,8 +48,20 @@
 	     font-size: 30px;
    }
 </style>
+<script>
+
+	function onDownload(bId) {
+		var o = document.getElementById("ifrm_filedown");
+		o.src = "download.do?bId=" + bId;
+
+	}
+
+</script>
+
 </head>
 <body class="bg-light">
+<iframe id="ifrm_filedown"  style="position:absolute; z-index:1;visibility : hidden;"></iframe>  
+
 <div class="container">
 	<header class="blog-header py-3">
 		<div class="row flex-nowrap justify-content-between align-items-center">
@@ -114,10 +126,17 @@
   		</tbody>
   		<%if(session.getAttribute("pic").equals("yes")) {%>
   		<tr>	
-    		<td><img src="./PUpload/${content_view.fileName}" style="width:auto; height:auto;"> </td> 		
-  		</tr>
-  			<td><a href="down.do?fileName=${dtos}">${content_view.fileName}</a></td>
+    		<td colspan="5"><img src="./PUpload/${content_view.sysFile}" style="width:100%; height:auto%;"> </td> 		
+  		</tr>  			
   		<%} %>
+  		<tr>
+
+			<th>첨부파일</th>
+
+			<td colspan="4"><a href="#" onclick="onDownload('${content_view.bId}')">${content_view.sysFile}</a></td>
+
+		</tr>
+
   		<tr>
   		<%if(session.getAttribute("bUrl").equals("notice.do")) {%>
 	  		<%if(session.getAttribute("check") != null){ %>

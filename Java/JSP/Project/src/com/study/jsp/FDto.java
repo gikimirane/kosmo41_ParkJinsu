@@ -1,32 +1,38 @@
 package com.study.jsp;
 
 public class FDto {
-	String file;
-	String oriFile;
+	String fileName;
+	String sysFile;
 	
 	public FDto() {
 		
 	}
-	
-	public FDto(String file, String oriFile) {
-		this.file = file;
-		this.oriFile = oriFile;
-	}
-	
-	public String getFile() {
-		return file;
+	public FDto(String fileName, String sysFile) {
+		this.fileName = fileName;
+		this.sysFile = sysFile;
 	}
 
-	public void setFile(String file) {
-		this.file = file;
+
+	public String getFileName() {
+		return fileName;
 	}
 
-	public String getOriFile() {
-		return oriFile;
+
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 
-	public void setOriFile(String oriFile) {
-		this.oriFile = oriFile;
+
+
+	public String getSysFile() {
+		return sysFile;
+	}
+
+
+
+	public void setSysFile(String sysFile) {
+		this.sysFile = sysFile;
 	}
 
 	
