@@ -111,7 +111,7 @@ function form_check() {
       	</div>
 
 <table class="table">
-	<form name="write_form" action="write.do" method="post">
+	<form name="write_form" action="modify.do" method="post">
 		<tr>
 			<div class="container">
 				<br>
@@ -122,6 +122,7 @@ function form_check() {
 		<tr>
 			<div class="container">
 				<div class="input-group mb-3">
+					<input type="hidden" name="bId" value="${content_view.bId}">
 	  				번호 : ${content_view.bId}
 				</div>
 			</div>
@@ -136,6 +137,7 @@ function form_check() {
 		<tr>
 			<div class="container">
 				<div class="input-group mb-3">
+					<input type="hidden" name="bName" value="${content_view.bName}">
 	  				아이디 : ${content_view.bName}
 				</div>
 			</div>

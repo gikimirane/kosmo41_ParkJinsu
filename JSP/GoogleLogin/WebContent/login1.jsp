@@ -19,7 +19,7 @@
         
         
         var trans = document.getElementById("aaa");
-        trans.value = profile.getId();
+        trans.innerHTML = profile.getEmail();
 
         // The ID token you need to pass to your backend:
         var id_token = googleUser.getAuthResponse().id_token;

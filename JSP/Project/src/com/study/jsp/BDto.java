@@ -16,7 +16,50 @@ public class BDto {
 	String bCheck;
 	String fileName;
 	
-
+	int num;
+	String roomList;
+	String bj;
+	int count;
+	String ox;
+	
+	String waitRoom;
+	
+	public String getWaitRoom() {
+		return waitRoom;
+	}
+	public void setWaitRoom(String waitRoom) {
+		this.waitRoom = waitRoom;
+	}
+	public int getNum() {
+		return num;
+	}
+	public void setNum(int num) {
+		this.num = num;
+	}
+	public String getBj() {
+		return bj;
+	}
+	public void setBj(String bj) {
+		this.bj = bj;
+	}
+	public int getCount() {
+		return count;
+	}
+	public void setCount(int count) {
+		this.count = count;
+	}
+	public String getOx() {
+		return ox;
+	}
+	public void setOx(String ox) {
+		this.ox = ox;
+	}
+	public String getRoomList() {
+		return roomList;
+	}
+	public void setRoomList(String roomList) {
+		this.roomList = roomList;
+	}
 	public String getFileName() {
 		return fileName;
 	}
@@ -42,10 +85,23 @@ public class BDto {
 	private String address;
 	
 	
-
+	
 	public BDto() {
 		
 	}
+	
+	public BDto(String waitRoom) {
+		this.waitRoom = waitRoom;
+	}
+	
+	public BDto(int num, String roomList, String bj, int count, String ox) {
+		this.num = num;
+		this.roomList = roomList;
+		this.bj = bj;
+		this.count = count;
+		this.ox = ox;
+	}
+
 	public BDto(String fileName, String sysFile) {
 		this.fileName = fileName;
 		this.sysFile = sysFile;

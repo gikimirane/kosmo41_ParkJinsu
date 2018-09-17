@@ -31,6 +31,7 @@ public class loginOk implements Service {
 		String pw = request.getParameter("pw");
 			
 		BDao dao = BDao.getInstance();
+		
 		int checkNum = dao.userCheck(id, pw);
 		if(checkNum == -1) {
 			writer.println("<html><head><body>");
@@ -63,12 +64,14 @@ public class loginOk implements Service {
 				writer.println("</body></html>");
 				writer.close();
 			} else 
-			{				
+			{	
+				
 				String name = dto.getName();
 					
 				session.setAttribute("id", id);
 				session.setAttribute("name", name);
 				session.setAttribute("ValidMem", "yes");
+				session.setAttribute("login", "origin");
 				if(session.getAttribute("bUrl").equals("first.do"))
 				{
 					writer.println("<html><head><body>");

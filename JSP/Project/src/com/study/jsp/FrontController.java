@@ -10,10 +10,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.study.jsp.chatt.BChattListCommand;
+import com.study.jsp.chatt.BPwRoomCommand;
+import com.study.jsp.chatt.BRoomCreateCommand;
+import com.study.jsp.chatt.BRoomInCommand;
+import com.study.jsp.chatt.BRoomOutCommand;
 import com.study.jsp.command.BCommand;
 import com.study.jsp.command.BContentCommand;
 import com.study.jsp.command.BDeleteCommand;
-import com.study.jsp.command.BDownCommand;
 import com.study.jsp.command.BFirstCommand;
 import com.study.jsp.command.BListCommand;
 import com.study.jsp.command.BModifyCommand;
@@ -22,6 +26,7 @@ import com.study.jsp.command.BReplyViewCommand;
 import com.study.jsp.command.BSearchCommand;
 import com.study.jsp.command.BUploadCommand;
 import com.study.jsp.command.BWriteCommand;
+import com.study.jsp.command.TEST;
 
 
 
@@ -29,7 +34,7 @@ import com.study.jsp.command.BWriteCommand;
 public class FrontController extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
-       
+
 
     public FrontController() {
         super();
@@ -103,8 +108,10 @@ public class FrontController extends HttpServlet {
 			else if(bUrl.equals("picture.do"))
 			{
 				viewPage = "picture_write.jsp";
+				
 			}
-			
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}
 		else if(com.equals("/write.do"))
 		{
@@ -114,6 +121,8 @@ public class FrontController extends HttpServlet {
 				command = new BWriteCommand();
 				command.execute(request, response);
 				viewPage = "list.do";
+				RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+				dispatcher.forward(request, response);
 			}
 			else if(session.getAttribute("bUrl").equals("notice.do"))
 			{
@@ -121,6 +130,8 @@ public class FrontController extends HttpServlet {
 				command = new BWriteCommand();
 				command.execute(request, response);
 				viewPage = "notice.do";
+				RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+				dispatcher.forward(request, response);
 			}
 			else if(session.getAttribute("bUrl").equals("picture.do"))
 			{
@@ -128,6 +139,8 @@ public class FrontController extends HttpServlet {
 				command = new BWriteCommand();
 				command.execute(request, response);
 				viewPage = "picture.do";
+				RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+				dispatcher.forward(request, response);
 			}
 		}
 		else if(com.equals("/list.do"))
@@ -137,6 +150,8 @@ public class FrontController extends HttpServlet {
 			command = new BListCommand();
 			command.execute(request, response);			
 			viewPage = "list.jsp";
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}
 		else if(com.equals("/picture.do"))
 		{   
@@ -145,18 +160,24 @@ public class FrontController extends HttpServlet {
 			command = new BListCommand();
 			command.execute(request, response);			
 			viewPage = "picture.jsp";
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}
 		else if(com.equals("/content_view.do"))
 		{        
 			command = new BContentCommand();
 			command.execute(request, response);
 			viewPage = "content_view.jsp";
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}
 		else if(com.equals("/modify_view.do"))
 		{        
 			command = new BContentCommand();
 			command.execute(request, response);
 			viewPage = "modify_view.jsp";
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}
 		else if(com.equals("/modify.do"))
 		{       
@@ -165,7 +186,9 @@ public class FrontController extends HttpServlet {
 			
 			command = new BContentCommand();
 			command.execute(request, response);
-			viewPage = "content_view.jsp";  
+			viewPage = "content_view.jsp"; 
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}
 		else if(com.equals("/delete.do"))
 		{        
@@ -175,6 +198,11 @@ public class FrontController extends HttpServlet {
 				viewPage = "list.do?page="+curPage; 
 			else if(session.getAttribute("bUrl").equals("notice.do"))
 				viewPage = "notice.do?page="+curPage;	
+			else if(session.getAttribute("bUrl").equals("picture.do"))
+				viewPage = "picture.do?page="+curPage;
+			
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 			
 		}
 		else if(com.equals("/reply_view.do"))
@@ -182,24 +210,34 @@ public class FrontController extends HttpServlet {
 			command = new BReplyViewCommand();
 			command.execute(request, response);
 			viewPage = "reply_view.jsp";
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}
 		else if(com.equals("/reply.do"))
-		{
+		{						
 			if(session.getAttribute("bUrl").equals("list.do"))
 			{
 				request.setAttribute("bCheck", "list");
 				command = new BReplyCommand();
-				command.execute(request, response);				
+				command.execute(request, response);	
 				viewPage = "list.do?page="+curPage; 
 			}
-			
 			else if(session.getAttribute("bUrl").equals("notice.do"))
 			{
 				request.setAttribute("bCheck", "notice");
 				command = new BReplyCommand();
 				command.execute(request, response);	
-				viewPage = "notice.do?page="+curPage;	
+				viewPage = "notice.do?page="+curPage; 
 			}
+			else if(session.getAttribute("bUrl").equals("picture.do"))
+			{
+				request.setAttribute("bCheck", "picture");
+				command = new BReplyCommand();
+				command.execute(request, response);	
+				viewPage = "picture.do?page="+curPage; 
+			}
+				RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+				dispatcher.forward(request, response);
 				
 		}
 		else if(com.equals("/joinOk.do"))
@@ -221,12 +259,16 @@ public class FrontController extends HttpServlet {
 		{	
 			logoutOk(request, response);
 			viewPage="first.jsp";
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}	
 		else if(com.equals("/first.do"))
 		{ 	
 			command = new BFirstCommand();  
 			command.execute(request, response);
 			viewPage = "first.jsp";
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}
 		else if(com.equals("/search.do"))
 		{
@@ -236,6 +278,8 @@ public class FrontController extends HttpServlet {
 				command = new BSearchCommand(); 
 				command.execute(request, response);
 				viewPage = "list.jsp";
+				RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+				dispatcher.forward(request, response);
 			}
 			
 			else if(session.getAttribute("bUrl").equals("notice.do"))
@@ -244,6 +288,8 @@ public class FrontController extends HttpServlet {
 				command = new BSearchCommand(); 
 				command.execute(request, response);
 				viewPage = "notice.jsp";
+				RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+				dispatcher.forward(request, response);
 			}
 			else if(session.getAttribute("bUrl").equals("picture.do"))
 			{
@@ -251,6 +297,8 @@ public class FrontController extends HttpServlet {
 				command = new BSearchCommand(); 
 				command.execute(request, response);
 				viewPage = "picture.jsp";
+				RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+				dispatcher.forward(request, response);
 			}
 					
 		}
@@ -260,6 +308,8 @@ public class FrontController extends HttpServlet {
 			command = new BListCommand(); 
 			command.execute(request, response);
 			viewPage="notice.jsp";
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}
 		else if(com.equals("/picture_upload.do"))
 		{
@@ -268,19 +318,59 @@ public class FrontController extends HttpServlet {
 			command = new BUploadCommand(); 
 			command.execute(request, response);
 			viewPage="picture.do";
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}
 		else if(com.equals("/download.do"))
 		{
 			
 			request.setAttribute("bCheck", "picture");
-			command = new BDownCommand(); 
-			command.execute(request, response);
+			TEST test = new TEST(); 
+			test.downLoad(request, response);
 			viewPage="/content_view.do";
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
 		}
+		else if(com.equals("/glogin.do"))
+		{			
+			service = new gLoginOk();
+			service.execute(request, response);
+			viewPage="first.jsp";
+		}
+		
+		else if(com.equals("/chatt.do"))
+		{			
+			command = new BChattListCommand(); 
+			command.execute(request, response);
+			viewPage="chatt.jsp";
+			RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
+			dispatcher.forward(request, response);
+		}
+		else if(com.equals("/roomIn.do"))
+		{			
+			command = new BRoomInCommand(); 
+			command.execute(request, response);
+
+		}
+		else if(com.equals("/roomOut.do"))
+		{			
+			command = new BRoomOutCommand(); 
+			command.execute(request, response);
 
 
-		RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
-		dispatcher.forward(request, response);
+		}
+		else if(com.equals("/roomCreate.do"))
+		{			
+			command = new BRoomCreateCommand(); 
+			command.execute(request, response);
+
+		}
+		else if(com.equals("/pwRoom.do"))
+		{			
+			command = new BPwRoomCommand(); 
+			command.execute(request, response);
+		}
+		
 	}
 	
 	public void logoutOk (HttpServletRequest request, HttpServletResponse response)

@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.sql.Connection;
@@ -12,6 +13,9 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -38,6 +42,9 @@ public class BDao {
 	
 	int listCount = 15;	// 한페이지 당 보여줄 게시물의 갯수
 	int pageCount = 10;	// 하단에 보여줄 페이지 리스트의 갯수
+	
+	int rlistCount = 5;
+	int rpageCount = 10;
 	
 	
 	private BDao() {
@@ -408,6 +415,7 @@ public class BDao {
 			{
 				totalCount = rs.getInt("total");
 			}
+			
 		}
 		catch(Exception e)
 		{
@@ -1364,7 +1372,7 @@ public class BDao {
 		return dto;
 	}
 	
-	public Object downLoad(HttpServletRequest request, HttpServletResponse response)
+	public String downLoad(HttpServletRequest request, HttpServletResponse response)
 	{
 		
 		try
@@ -1393,6 +1401,7 @@ public class BDao {
 						response.setHeader("Content-Disposition", "filename="+filename+";");
 					}
 					else {
+						filename = URLEncoder.encode(filename, "UTF-8").replaceAll("\\+", "%20");
 						response.setHeader("Content-Disposition", "attachment; filename="+filename+";");
 					}
 					response.setHeader("Content-Length", String.valueOf(filesize));
@@ -1530,5 +1539,77 @@ public class BDao {
 				
 		return null;
 	}
+	public BPageInfo chattList(int curPage)
+	{
+		// 로직
+		
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		//총 게시물의 갯수
+		int totalCount = 0;
+		try 
+		{
+			con = dataSource.getConnection();
+			String query = "select count(roomlist) as total from room where roomlist is not null";
+			pstmt = con.prepareStatement(query);
+			rs = pstmt.executeQuery();
+			if(rs.next())
+			{
+				totalCount = rs.getInt("total");
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally {
+			try
+			{
+				if(rs != null)rs.close();
+				if(pstmt != null)pstmt.close();
+				if(con != null)con.close();
+			}
+			catch(Exception e2)
+			{
+				e2.printStackTrace();
+			}
+		}
+		// 총 페이지 수
+			
+		int totalPage = totalCount / rlistCount;
+			
+		if(totalCount % rlistCount > 0)
+			totalPage++;
+			
+		int myCurPage = curPage;
+		if(myCurPage > totalPage)
+			myCurPage = totalPage;
+		if(myCurPage <= 1)
+			myCurPage = 1;
+			
+		//시작 페이지
+		int startPage = ((myCurPage - 1) / rpageCount) * rpageCount + 1;
+		
+		//끝 페이지
+		int endPage = startPage + rpageCount - 1;
+		if (endPage > totalPage) 
+		    endPage = totalPage;
+
+		BPageInfo pinfo = new BPageInfo();
+		pinfo.setTotalCount(totalCount);
+		pinfo.setListCount(rlistCount);
+		pinfo.setTotalPage(totalPage);
+		pinfo.setCurPage(myCurPage);
+		pinfo.setPageCount(rpageCount);
+		pinfo.setStartPage(startPage);
+		pinfo.setEndPage(endPage);
+		
+		// set
+		return pinfo;
+	}
+	
+	
 	
 }
